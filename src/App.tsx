@@ -1,6 +1,17 @@
-import { type DragEvent, useEffect, useState } from 'react';
+import {
+  type ChangeEvent,
+  type DragEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { RichTextCell } from './components/RichTextCell';
-import { createInitialBoard, loadBoard, saveBoard } from './lib/boardStorage';
+import {
+  createInitialBoard,
+  loadBoard,
+  parseBoardRows,
+  saveBoard,
+} from './lib/boardStorage';
 import {
   DEFAULT_POST_IT_COLOR,
   type ColumnId,
@@ -67,6 +78,7 @@ function App() {
   const [rows, setRows] = useState<EvaluationRow[]>(() => loadBoard());
   const [composer, setComposer] = useState<ComposerState | null>(null);
   const [editingCard, setEditingCard] = useState<EditingCardState | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOverTarget, setDragOverTarget] = useState<{
     rowIndex: number;
     columnId: ColumnId;
@@ -300,6 +312,69 @@ function App() {
     setRows(createInitialBoard());
     setComposer(null);
     setEditingCard(null);
+  };
+
+  const handleExportBoard = () => {
+    const payload = {
+      app: 'quadro-de-avaliacao',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      rows,
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+
+    const formattedDate = new Date().toISOString().slice(0, 10);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `quadro-avaliacao-${formattedDate}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleOpenFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportBoard = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    try {
+      const content = await file.text();
+      const parsed = JSON.parse(content) as unknown;
+
+      const candidateRows =
+        parsed && typeof parsed === 'object' && 'rows' in (parsed as object)
+          ? (parsed as { rows: unknown }).rows
+          : parsed;
+
+      const normalizedRows = parseBoardRows(candidateRows);
+      if (!normalizedRows) {
+        window.alert(
+          'Arquivo inválido. Selecione um JSON exportado do quadro.',
+        );
+        return;
+      }
+
+      setRows(normalizedRows);
+      setComposer(null);
+      setEditingCard(null);
+      setDragOverTarget(null);
+    } catch {
+      window.alert(
+        'Não foi possível abrir este arquivo. Verifique o formato JSON.',
+      );
+    } finally {
+      event.target.value = '';
+    }
   };
 
   const getColumnCardCount = (columnId: ColumnId): number =>
@@ -616,13 +691,36 @@ function App() {
             <small className='text-body-secondary'>
               Dica: arraste e solte os cartões entre qualquer linha e coluna.
             </small>
-            <button
-              type='button'
-              className='btn btn-outline-secondary'
-              onClick={handleResetBoard}
-            >
-              Limpar quadro
-            </button>
+            <div className='board-file-actions'>
+              <input
+                ref={fileInputRef}
+                type='file'
+                accept='.json,application/json'
+                className='d-none'
+                onChange={handleImportBoard}
+              />
+              <button
+                type='button'
+                className='btn btn-outline-secondary'
+                onClick={handleOpenFilePicker}
+              >
+                Abrir arquivo
+              </button>
+              <button
+                type='button'
+                className='btn btn-outline-secondary'
+                onClick={handleExportBoard}
+              >
+                Salvar arquivo
+              </button>
+              <button
+                type='button'
+                className='btn btn-outline-secondary'
+                onClick={handleResetBoard}
+              >
+                Limpar quadro
+              </button>
+            </div>
           </div>
         </section>
 

@@ -73,6 +73,21 @@ function isEvaluationRow(value: unknown): value is EvaluationRow {
   );
 }
 
+export function parseBoardRows(value: unknown): EvaluationRow[] | null {
+  if (
+    !Array.isArray(value) ||
+    value.length !== INITIAL_EVALUATION_ROWS.length
+  ) {
+    return null;
+  }
+
+  if (!value.every(isEvaluationRow)) {
+    return null;
+  }
+
+  return value.map((row) => normalizeRow(row as EvaluationRow));
+}
+
 export function createInitialBoard(): EvaluationRow[] {
   return INITIAL_EVALUATION_ROWS.map((row) =>
     normalizeRow({
@@ -92,19 +107,8 @@ export function loadBoard(): EvaluationRow[] {
 
   try {
     const parsed = JSON.parse(raw);
-
-    if (
-      !Array.isArray(parsed) ||
-      parsed.length !== INITIAL_EVALUATION_ROWS.length
-    ) {
-      return createInitialBoard();
-    }
-
-    if (!parsed.every(isEvaluationRow)) {
-      return createInitialBoard();
-    }
-
-    return parsed.map((row) => normalizeRow(row as EvaluationRow));
+    const normalizedRows = parseBoardRows(parsed);
+    return normalizedRows ?? createInitialBoard();
   } catch {
     return createInitialBoard();
   }

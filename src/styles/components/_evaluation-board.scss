@@ -348,6 +348,13 @@
   gap: 1rem;
 }
 
+.board-file-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 .app-footer {
   margin-top: 1rem;
   display: flex;
@@ -394,5 +401,9 @@
   .board-panel-footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .board-file-actions {
+    justify-content: flex-start;
   }
 }
