@@ -1,15 +1,29 @@
 import {
+  DEFAULT_POST_IT_COLOR,
   type BoardCard,
   type ColumnId,
   INITIAL_EVALUATION_ROWS,
   type EvaluationRow,
   type LayerId,
+  type PostItColor,
 } from '../types/board';
 
 const STORAGE_KEY = 'evaluation-board-v1';
 
 const LAYERS: LayerId[] = ['informal', 'formal', 'technical'];
 const COLUMNS: ColumnId[] = ['stakeholders', 'issues', 'ideas'];
+const POST_IT_COLORS: PostItColor[] = [
+  'yellow',
+  'pink',
+  'blue',
+  'green',
+  'orange',
+  'purple',
+];
+
+function isPostItColor(value: unknown): value is PostItColor {
+  return POST_IT_COLORS.includes(value as PostItColor);
+}
 
 function isBoardCard(value: unknown): value is BoardCard {
   if (!value || typeof value !== 'object') {
@@ -19,8 +33,26 @@ function isBoardCard(value: unknown): value is BoardCard {
   const candidate = value as Record<string, unknown>;
 
   return (
-    typeof candidate.id === 'string' && typeof candidate.content === 'string'
+    typeof candidate.id === 'string' &&
+    typeof candidate.content === 'string' &&
+    (candidate.color === undefined || isPostItColor(candidate.color))
   );
+}
+
+function normalizeCard(card: BoardCard): BoardCard {
+  return {
+    ...card,
+    color: isPostItColor(card.color) ? card.color : DEFAULT_POST_IT_COLOR,
+  };
+}
+
+function normalizeRow(row: EvaluationRow): EvaluationRow {
+  return {
+    ...row,
+    stakeholders: row.stakeholders.map(normalizeCard),
+    issues: row.issues.map(normalizeCard),
+    ideas: row.ideas.map(normalizeCard),
+  };
 }
 
 function isEvaluationRow(value: unknown): value is EvaluationRow {
@@ -42,12 +74,14 @@ function isEvaluationRow(value: unknown): value is EvaluationRow {
 }
 
 export function createInitialBoard(): EvaluationRow[] {
-  return INITIAL_EVALUATION_ROWS.map((row) => ({
-    ...row,
-    stakeholders: [...row.stakeholders],
-    issues: [...row.issues],
-    ideas: [...row.ideas],
-  }));
+  return INITIAL_EVALUATION_ROWS.map((row) =>
+    normalizeRow({
+      ...row,
+      stakeholders: [...row.stakeholders],
+      issues: [...row.issues],
+      ideas: [...row.ideas],
+    }),
+  );
 }
 
 export function loadBoard(): EvaluationRow[] {
@@ -70,7 +104,7 @@ export function loadBoard(): EvaluationRow[] {
       return createInitialBoard();
     }
 
-    return parsed;
+    return parsed.map((row) => normalizeRow(row as EvaluationRow));
   } catch {
     return createInitialBoard();
   }

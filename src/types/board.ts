@@ -1,9 +1,19 @@
 export type LayerId = 'informal' | 'formal' | 'technical';
 export type ColumnId = 'stakeholders' | 'issues' | 'ideas';
+export type PostItColor =
+  | 'yellow'
+  | 'pink'
+  | 'blue'
+  | 'green'
+  | 'orange'
+  | 'purple';
+
+export const DEFAULT_POST_IT_COLOR: PostItColor = 'yellow';
 
 export interface BoardCard {
   id: string;
   content: string;
+  color: PostItColor;
 }
 
 export interface EvaluationRow {

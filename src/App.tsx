@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { RichTextCell } from './components/RichTextCell';
 import { createInitialBoard, loadBoard, saveBoard } from './lib/boardStorage';
-import type { ColumnId, EvaluationRow } from './types/board';
+import {
+  DEFAULT_POST_IT_COLOR,
+  type ColumnId,
+  type EvaluationRow,
+  type PostItColor,
+} from './types/board';
 
 interface ComposerState {
   rowIndex: number;
@@ -16,6 +21,15 @@ const COLUMN_LABELS: Record<ColumnId, string> = {
   issues: 'Questões / Problemas',
   ideas: 'Ideias / Soluções',
 };
+
+const POST_IT_PALETTE: Array<{ id: PostItColor; label: string }> = [
+  { id: 'yellow', label: 'Amarelo' },
+  { id: 'pink', label: 'Rosa' },
+  { id: 'blue', label: 'Azul' },
+  { id: 'green', label: 'Verde' },
+  { id: 'orange', label: 'Laranja' },
+  { id: 'purple', label: 'Roxo' },
+];
 
 function createCardId(): string {
   if (
@@ -60,7 +74,11 @@ function App() {
               ...row,
               [composer.columnId]: [
                 ...row[composer.columnId],
-                { id: createCardId(), content: composer.value },
+                {
+                  id: createCardId(),
+                  content: composer.value,
+                  color: DEFAULT_POST_IT_COLOR,
+                },
               ],
             }
           : row,
@@ -116,6 +134,26 @@ function App() {
           [toColumnId]: [...row[toColumnId], card],
         };
       }),
+    );
+  };
+
+  const handleChangeCardColor = (
+    rowIndex: number,
+    columnId: ColumnId,
+    cardId: string,
+    color: PostItColor,
+  ) => {
+    setRows((currentRows) =>
+      currentRows.map((row, index) =>
+        index === rowIndex
+          ? {
+              ...row,
+              [columnId]: row[columnId].map((card) =>
+                card.id === cardId ? { ...card, color } : card,
+              ),
+            }
+          : row,
+      ),
     );
   };
 
@@ -183,7 +221,11 @@ function App() {
                                 : null;
 
                             return (
-                              <article className='kanban-card' key={card.id}>
+                              <article
+                                className='kanban-card'
+                                key={card.id}
+                                data-post-it-color={card.color}
+                              >
                                 <div
                                   className='kanban-card-content'
                                   dangerouslySetInnerHTML={{
@@ -191,6 +233,34 @@ function App() {
                                   }}
                                 />
                                 <div className='kanban-card-actions'>
+                                  <div
+                                    className='kanban-color-palette'
+                                    role='group'
+                                    aria-label='Selecionar cor do post-it'
+                                  >
+                                    {POST_IT_PALETTE.map((paletteColor) => (
+                                      <button
+                                        key={`${card.id}-${paletteColor.id}`}
+                                        type='button'
+                                        className={`kanban-color-swatch ${
+                                          card.color === paletteColor.id
+                                            ? 'is-active'
+                                            : ''
+                                        }`}
+                                        data-post-it-color={paletteColor.id}
+                                        onClick={() =>
+                                          handleChangeCardColor(
+                                            rowIndex,
+                                            columnId,
+                                            card.id,
+                                            paletteColor.id,
+                                          )
+                                        }
+                                        aria-label={`Cor ${paletteColor.label}`}
+                                        title={`Cor ${paletteColor.label}`}
+                                      />
+                                    ))}
+                                  </div>
                                   {previousColumn && (
                                     <button
                                       type='button'
