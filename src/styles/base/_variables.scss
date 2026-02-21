@@ -1,0 +1,98 @@
+@use 'sass:color';
+
+// === BASE COLORS ===
+$primary: hsl(225, 65%, 40%);
+$secondary: hsl(0, 0%, 18%);
+
+// Semantic colors
+$success: hsl(120, 77%, 27%);
+$info: hsl(206, 100%, 42%);
+$warning: hsl(33, 100%, 50%);
+$danger: hsl(358, 63%, 51%);
+$light: hsl(210, 17%, 98%);
+$dark: hsl(0, 0%, 12%);
+
+// Custom grayscale — more contrast, cooler tones
+$gray-50: hsl(0, 0%, 98%);
+$gray-100: hsl(0, 0%, 96%);
+$gray-200: hsl(0, 0%, 90%);
+$gray-300: hsl(0, 0%, 82%);
+$gray-400: hsl(0, 0%, 64%);
+$gray-500: hsl(0, 0%, 45%);
+$gray-600: hsl(0, 0%, 32%);
+$gray-700: hsl(0, 0%, 25%);
+$gray-800: hsl(0, 0%, 15%);
+$gray-900: hsl(0, 0%, 9%);
+
+// Body
+$body-bg: $gray-100;
+$body-color: $gray-900;
+
+// === TYPOGRAPHY ===
+$font-family-sans-serif:
+  'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  'Helvetica Neue',
+  Arial,
+  sans-serif;
+$font-size-base: 1rem;
+$font-size-sm: $font-size-base * 0.9;
+$font-size-lg: $font-size-base * 1.15;
+$line-height-base: 1.6;
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-base: $font-weight-normal;
+
+// Headings
+$headings-font-family: $font-family-sans-serif;
+$headings-font-weight: $font-weight-semibold;
+$headings-line-height: 1.3;
+$headings-color: $gray-900;
+$headings-margin-bottom: 1rem;
+
+// === EDGES ===
+$border-radius: 0;
+$border-radius-lg: 0;
+$border-radius-sm: 0;
+$btn-border-radius: 0;
+$input-border-radius: 0;
+$form-check-input-border-radius: 0;
+
+// === BUTTONS ===
+$btn-font-weight: 400;
+$btn-padding-y: 0.75rem;
+$btn-padding-x: 1rem;
+$btn-focus-box-shadow: none;
+$btn-border-width: 1px;
+
+// === FORMS ===
+$form-control-bg: $gray-100;
+$form-control-border-color: $gray-700;
+$form-control-color: $gray-900;
+$form-control-border-width: 0 0 1px 0;
+$form-control-focus-border-color: $primary;
+$form-control-focus-box-shadow: 0 1px 0 0 $primary;
+$form-select-border-color: $gray-700;
+$form-select-focus-border-color: $primary;
+$form-check-input-border: 1px solid $gray-700;
+$form-check-input-focus-border: $primary;
+
+// === INPUTS ===
+$input-btn-focus-box-shadow: none;
+
+// === LINKS ===
+$link-color: $primary;
+$link-hover-color: color.mix(black, $primary, 10%);
+$link-decoration: underline;
+
+// === CARDS ===
+$card-border-radius: 0;
+$card-box-shadow: none;
+
+$enable-dark-mode: true;

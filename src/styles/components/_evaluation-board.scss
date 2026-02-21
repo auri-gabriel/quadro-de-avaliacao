@@ -1,0 +1,86 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.board-header {
+  border-top: 6px solid var(--bs-primary);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--bs-info) 80%, white 20%) 0%,
+    color-mix(in srgb, var(--bs-info) 55%, white 45%) 75%,
+    color-mix(in srgb, var(--bs-primary) 85%, white 15%) 100%
+  );
+}
+
+.board-table-wrapper {
+  background: var(--bs-body-bg);
+}
+
+.board-table {
+  table-layout: fixed;
+
+  thead th {
+    font-weight: 600;
+    vertical-align: middle;
+    text-align: left;
+  }
+
+  tbody tr {
+    height: 180px;
+  }
+}
+
+.board-group-cell {
+  width: 16%;
+  white-space: nowrap;
+  font-size: 1.35rem;
+  font-weight: 500;
+  vertical-align: top;
+}
+
+.rich-text-editor {
+  .ql-toolbar.ql-snow {
+    border: 0;
+    border-bottom: 1px solid var(--bs-border-color);
+    border-radius: 0;
+    background: var(--bs-tertiary-bg);
+  }
+
+  .ql-container.ql-snow {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .ql-editor {
+    min-height: 160px;
+    line-height: 1.45;
+  }
+
+  .ql-editor.ql-blank::before {
+    color: var(--bs-secondary-color);
+    font-style: normal;
+  }
+}
+
+.board-help-text {
+  font-size: clamp(1.45rem, 1.35rem + 0.4vw, 1.95rem);
+  line-height: 1.4;
+}
+
+@media (max-width: 1199.98px) {
+  .board-group-cell {
+    font-size: 1.1rem;
+  }
+
+  .board-table tbody tr {
+    height: auto;
+  }
+
+  .rich-text-editor .ql-editor {
+    min-height: 140px;
+  }
+
+  .board-help-text {
+    font-size: 1.25rem;
+  }
+}

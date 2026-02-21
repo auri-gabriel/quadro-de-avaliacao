@@ -1,0 +1,20 @@
+@import '../base/variables';
+
+// Custom accordion styles to remove primary highlight when expanded
+.accordion-button:not(.collapsed) {
+  background-color: var(
+    --bs-accordion-button-active-bg,
+    var(--bs-accordion-bg)
+  );
+  color: var(--bs-accordion-button-active-color, var(--bs-accordion-color));
+  box-shadow: none;
+}
+
+// Restore focus indicator for keyboard navigation accessibility
+.accordion-button:focus {
+  box-shadow: var(
+    --bs-btn-focus-box-shadow,
+    0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25)
+  );
+  border-color: var(--bs-btn-focus-border-color, var(--bs-primary));
+}

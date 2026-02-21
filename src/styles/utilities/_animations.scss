@@ -1,0 +1,9 @@
+.arrow-container {
+  display: inline-block;
+  font-size: 1.75rem;
+  transition: transform 0.2s ease;
+}
+
+a:hover .arrow-container {
+  transform: translateX(6px);
+}

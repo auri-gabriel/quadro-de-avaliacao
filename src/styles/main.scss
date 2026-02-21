@@ -1,0 +1,5 @@
+// Base styles and Bootstrap setup
+@use 'base/bootstrap-setup';
+
+// Component styles
+@use 'components/evaluation-board';

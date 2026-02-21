@@ -1,0 +1,119 @@
+@import '../base/variables';
+
+.ql-editor {
+  min-height: 150px;
+  background-color: $gray-50;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: $gray-900;
+  font-family: $font-family-sans-serif;
+  font-weight: $font-weight-normal;
+  padding: 0.75rem;
+  border: none;
+
+  &:focus {
+    outline: 2px solid $primary;
+    outline-offset: -2px;
+  }
+}
+
+.ql-toolbar {
+  border: none;
+  border-bottom: 1px solid $gray-700;
+  background-color: $gray-50;
+  padding: 0.5rem 0.75rem;
+  font-family: $font-family-sans-serif;
+
+  .ql-formats {
+    margin-right: 1rem;
+  }
+
+  button {
+    border-radius: $border-radius;
+    padding: 0.25rem;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: $gray-200;
+      border-color: $gray-300;
+    }
+
+    &.ql-active {
+      background-color: $primary;
+      color: white;
+      border-color: $primary;
+    }
+  }
+
+  .ql-picker {
+    color: $gray-700;
+
+    &.ql-expanded .ql-picker-label {
+      border-color: $primary;
+    }
+  }
+}
+
+.ql-container {
+  border: 1px solid $gray-700;
+  border-top: none;
+  font-family: $font-family-sans-serif;
+  font-size: $font-size-base;
+
+  &.ql-snow {
+    border-color: $gray-700;
+
+    &:focus-within {
+      border-color: $primary;
+      box-shadow: 0 1px 0 0 $primary;
+    }
+  }
+}
+
+.ql-editor.ql-blank::before {
+  color: $gray-500;
+  font-style: normal;
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  left: 0.75rem;
+  right: 0.75rem;
+}
+
+.ql-tooltip {
+  background-color: $gray-900;
+  border: 1px solid $gray-700;
+  border-radius: $border-radius;
+  color: white;
+  font-family: $font-family-sans-serif;
+  font-size: $font-size-sm;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  &::before {
+    border-bottom-color: $gray-900;
+  }
+
+  input[type='text'] {
+    background-color: $gray-800;
+    border: 1px solid $gray-600;
+    color: white;
+    font-family: $font-family-sans-serif;
+
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
+  }
+
+  a.ql-action::after,
+  a.ql-remove::after {
+    border-left-color: $gray-400;
+  }
+}
+
+.ql-container,
+.ql-toolbar {
+  &:focus-within {
+    outline: 2px solid $primary;
+    outline-offset: -2px;
+  }
+}
