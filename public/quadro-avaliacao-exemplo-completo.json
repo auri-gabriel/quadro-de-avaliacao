@@ -1,0 +1,172 @@
+{
+  "app": "quadro-de-avaliacao",
+  "version": 1,
+  "exportedAt": "2026-02-21T20:30:00.000Z",
+  "rows": [
+    {
+      "layerId": "informal",
+      "layerLabel": "Informal",
+      "stakeholders": [
+        {
+          "id": "inf-stk-1",
+          "content": "<p><strong>Famílias atendidas</strong></p><p>Responsáveis por crianças e adolescentes em situação de vulnerabilidade.</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "inf-stk-2",
+          "content": "<p><strong>Lideranças comunitárias</strong></p><p>Representantes de bairro que apoiam a mobilização local.</p>",
+          "color": "green"
+        },
+        {
+          "id": "inf-stk-3",
+          "content": "<p><strong>Voluntariado local</strong></p><p>Apoio em eventos e campanhas de arrecadação.</p>",
+          "color": "blue"
+        }
+      ],
+      "issues": [
+        {
+          "id": "inf-iss-1",
+          "content": "<p><strong>Baixa adesão inicial</strong></p><p>Dificuldade em engajar famílias nas primeiras semanas.</p>",
+          "color": "orange"
+        },
+        {
+          "id": "inf-iss-2",
+          "content": "<p><strong>Comunicação fragmentada</strong></p><p>Informações chegam por canais diferentes e sem padrão.</p>",
+          "color": "pink"
+        },
+        {
+          "id": "inf-iss-3",
+          "content": "<p><strong>Conflito de horários</strong></p><p>Atividades coincidem com jornada de trabalho dos responsáveis.</p>",
+          "color": "purple"
+        }
+      ],
+      "ideas": [
+        {
+          "id": "inf-ide-1",
+          "content": "<p><strong>Calendário comunitário</strong></p><ul><li>Publicação mensal</li><li>Lembrete por WhatsApp</li></ul>",
+          "color": "yellow"
+        },
+        {
+          "id": "inf-ide-2",
+          "content": "<p><strong>Ponto focal por território</strong></p><p>Uma liderança por região para repassar orientações.</p>",
+          "color": "green"
+        },
+        {
+          "id": "inf-ide-3",
+          "content": "<p><strong>Plantão de escuta noturno</strong></p><p>Atendimento em horário estendido para ampliar acesso.</p>",
+          "color": "blue"
+        }
+      ]
+    },
+    {
+      "layerId": "formal",
+      "layerLabel": "Formal",
+      "stakeholders": [
+        {
+          "id": "for-stk-1",
+          "content": "<p><strong>Secretaria Municipal de Assistência Social</strong></p><p>Gestão de políticas públicas e monitoramento de metas.</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "for-stk-2",
+          "content": "<p><strong>Conselho Tutelar</strong></p><p>Encaminhamento de casos prioritários e proteção de direitos.</p>",
+          "color": "pink"
+        },
+        {
+          "id": "for-stk-3",
+          "content": "<p><strong>Rede de educação</strong></p><p>Diretores e coordenação pedagógica das escolas parceiras.</p>",
+          "color": "orange"
+        }
+      ],
+      "issues": [
+        {
+          "id": "for-iss-1",
+          "content": "<p><strong>Fluxo de encaminhamento lento</strong></p><p>Prazo médio elevado entre triagem e atendimento especializado.</p>",
+          "color": "blue"
+        },
+        {
+          "id": "for-iss-2",
+          "content": "<p><strong>Indicadores não consolidados</strong></p><p>Dados em planilhas separadas por órgão parceiro.</p>",
+          "color": "purple"
+        },
+        {
+          "id": "for-iss-3",
+          "content": "<p><strong>Falta de protocolo único</strong></p><p>Cada unidade registra casos com critérios diferentes.</p>",
+          "color": "green"
+        }
+      ],
+      "ideas": [
+        {
+          "id": "for-ide-1",
+          "content": "<p><strong>Protocolo intersetorial</strong></p><p>Padronizar critérios de priorização e retorno.</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "for-ide-2",
+          "content": "<p><strong>Painel de indicadores</strong></p><ul><li>Meta mensal</li><li>Fila por unidade</li><li>Tempo médio</li></ul>",
+          "color": "blue"
+        },
+        {
+          "id": "for-ide-3",
+          "content": "<p><strong>Ritual quinzenal de governança</strong></p><p>Reunião curta com decisões e responsáveis definidos.</p>",
+          "color": "green"
+        }
+      ]
+    },
+    {
+      "layerId": "technical",
+      "layerLabel": "Tecnico",
+      "stakeholders": [
+        {
+          "id": "tec-stk-1",
+          "content": "<p><strong>Equipe técnica do CCFV</strong></p><p>Assistente social, psicólogo, pedagogo e orientadores.</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "tec-stk-2",
+          "content": "<p><strong>TI da prefeitura</strong></p><p>Suporte de infraestrutura, conectividade e segurança.</p>",
+          "color": "blue"
+        },
+        {
+          "id": "tec-stk-3",
+          "content": "<p><strong>Equipe de monitoramento</strong></p><p>Consolidação de dados e avaliação de impacto.</p>",
+          "color": "purple"
+        }
+      ],
+      "issues": [
+        {
+          "id": "tec-iss-1",
+          "content": "<p><strong>Capacidade limitada de atendimento</strong></p><p>Demanda maior que disponibilidade de profissionais.</p>",
+          "color": "orange"
+        },
+        {
+          "id": "tec-iss-2",
+          "content": "<p><strong>Falta de integração entre registros</strong></p><p>Histórico de atendimentos disperso em ferramentas distintas.</p>",
+          "color": "pink"
+        },
+        {
+          "id": "tec-iss-3",
+          "content": "<p><strong>Lacunas de capacitação</strong></p><p>Equipe nova sem trilha de onboarding padronizada.</p>",
+          "color": "green"
+        }
+      ],
+      "ideas": [
+        {
+          "id": "tec-ide-1",
+          "content": "<p><strong>Plano de capacidade trimestral</strong></p><p>Mapear carga por profissional e ajustar agenda de grupos.</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "tec-ide-2",
+          "content": "<p><strong>Base única de atendimento</strong></p><p>Padronizar registro mínimo com campos obrigatórios.</p>",
+          "color": "blue"
+        },
+        {
+          "id": "tec-ide-3",
+          "content": "<p><strong>Trilha técnica contínua</strong></p><ul><li>Boas práticas de acolhimento</li><li>Documentação</li><li>Indicadores</li></ul>",
+          "color": "purple"
+        }
+      ]
+    }
+  ]
+}
