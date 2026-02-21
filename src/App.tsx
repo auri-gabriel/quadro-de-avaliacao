@@ -165,229 +165,287 @@ function App() {
   const getColumnCardCount = (columnId: ColumnId): number =>
     rows.reduce((total, row) => total + row[columnId].length, 0);
 
+  const totalCards = COLUMN_ORDER.reduce(
+    (total, columnId) => total + getColumnCardCount(columnId),
+    0,
+  );
+
+  const activeLayers = rows.filter(
+    (row) => row.stakeholders.length + row.issues.length + row.ideas.length > 0,
+  ).length;
+
+  const lastUpdated = new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date());
+
   return (
     <div className='app-shell'>
-      <header className='board-header'>
-        <div className='container-fluid board-layout py-4'>
-          <h1 className='mb-0 fw-semibold'>Análise: Quadro de Avaliação</h1>
+      <header className='app-topbar'>
+        <div className='container-fluid board-layout d-flex justify-content-between align-items-center py-2'>
+          <div className='app-brand'>Quadro de Avaliação</div>
+          <div className='app-topbar-meta'>Atualizado em {lastUpdated}</div>
         </div>
       </header>
 
+      <section className='board-header'>
+        <div className='container-fluid board-layout py-4 py-xl-5'>
+          <div className='board-header-grid'>
+            <div>
+              <h1 className='mb-2 fw-semibold'>Análise: Quadro de Avaliação</h1>
+              <p className='board-subtitle mb-0'>
+                Organize stakeholders, problemas e soluções com cartões no
+                estilo post-it.
+              </p>
+            </div>
+
+            <div className='board-kpis'>
+              <article className='kpi-card'>
+                <span className='kpi-label'>Cartões</span>
+                <strong className='kpi-value'>{totalCards}</strong>
+              </article>
+              <article className='kpi-card'>
+                <span className='kpi-label'>Camadas ativas</span>
+                <strong className='kpi-value'>{activeLayers}/3</strong>
+              </article>
+              <article className='kpi-card'>
+                <span className='kpi-label'>Partes interessadas</span>
+                <strong className='kpi-value'>
+                  {getColumnCardCount('stakeholders')}
+                </strong>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <main className='container-fluid board-layout py-4 py-md-5'>
-        <div className='table-responsive board-table-wrapper'>
-          <table className='table table-bordered align-middle mb-0 board-table'>
-            <colgroup>
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '29.33%' }} />
-              <col style={{ width: '29.33%' }} />
-              <col style={{ width: '29.33%' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th scope='col'>Camadas</th>
-                {COLUMN_ORDER.map((columnId) => (
-                  <th scope='col' key={columnId}>
-                    <div className='board-column-head'>
-                      <span>{COLUMN_LABELS[columnId]}</span>
-                      <span className='badge text-bg-secondary'>
-                        {getColumnCardCount(columnId)}
-                      </span>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, rowIndex) => (
-                <tr key={row.layerId}>
-                  <th scope='row' className='board-group-cell'>
-                    {row.layerLabel}
-                  </th>
-                  {COLUMN_ORDER.map((columnId) => {
-                    const cards = row[columnId];
+        <section className='board-panel'>
+          <div className='table-responsive board-table-wrapper'>
+            <table className='table table-bordered align-middle mb-0 board-table'>
+              <colgroup>
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '29.33%' }} />
+                <col style={{ width: '29.33%' }} />
+                <col style={{ width: '29.33%' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th scope='col'>Camadas</th>
+                  {COLUMN_ORDER.map((columnId) => (
+                    <th scope='col' key={columnId}>
+                      <div className='board-column-head'>
+                        <span>{COLUMN_LABELS[columnId]}</span>
+                        <span className='badge text-bg-secondary'>
+                          {getColumnCardCount(columnId)}
+                        </span>
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, rowIndex) => (
+                  <tr key={row.layerId}>
+                    <th scope='row' className='board-group-cell'>
+                      {row.layerLabel}
+                    </th>
+                    {COLUMN_ORDER.map((columnId) => {
+                      const cards = row[columnId];
 
-                    return (
-                      <td key={`${row.layerId}-${columnId}`}>
-                        <div className='kanban-cell'>
-                          {cards.map((card) => {
-                            const columnIndex = COLUMN_ORDER.indexOf(columnId);
-                            const previousColumn =
-                              columnIndex > 0
-                                ? COLUMN_ORDER[columnIndex - 1]
-                                : null;
-                            const nextColumn =
-                              columnIndex < COLUMN_ORDER.length - 1
-                                ? COLUMN_ORDER[columnIndex + 1]
-                                : null;
+                      return (
+                        <td key={`${row.layerId}-${columnId}`}>
+                          <div className='kanban-cell'>
+                            {cards.map((card) => {
+                              const columnIndex =
+                                COLUMN_ORDER.indexOf(columnId);
+                              const previousColumn =
+                                columnIndex > 0
+                                  ? COLUMN_ORDER[columnIndex - 1]
+                                  : null;
+                              const nextColumn =
+                                columnIndex < COLUMN_ORDER.length - 1
+                                  ? COLUMN_ORDER[columnIndex + 1]
+                                  : null;
 
-                            return (
-                              <article
-                                className='kanban-card'
-                                key={card.id}
-                                data-post-it-color={card.color}
-                              >
-                                <div
-                                  className='kanban-card-content'
-                                  dangerouslySetInnerHTML={{
-                                    __html: card.content,
-                                  }}
-                                />
-                                <div className='kanban-card-actions'>
+                              return (
+                                <article
+                                  className='kanban-card'
+                                  key={card.id}
+                                  data-post-it-color={card.color}
+                                >
                                   <div
-                                    className='kanban-color-palette'
-                                    role='group'
-                                    aria-label='Selecionar cor do post-it'
-                                  >
-                                    {POST_IT_PALETTE.map((paletteColor) => (
+                                    className='kanban-card-content'
+                                    dangerouslySetInnerHTML={{
+                                      __html: card.content,
+                                    }}
+                                  />
+                                  <div className='kanban-card-actions'>
+                                    <div
+                                      className='kanban-color-palette'
+                                      role='group'
+                                      aria-label='Selecionar cor do post-it'
+                                    >
+                                      {POST_IT_PALETTE.map((paletteColor) => (
+                                        <button
+                                          key={`${card.id}-${paletteColor.id}`}
+                                          type='button'
+                                          className={`kanban-color-swatch ${
+                                            card.color === paletteColor.id
+                                              ? 'is-active'
+                                              : ''
+                                          }`}
+                                          data-post-it-color={paletteColor.id}
+                                          onClick={() =>
+                                            handleChangeCardColor(
+                                              rowIndex,
+                                              columnId,
+                                              card.id,
+                                              paletteColor.id,
+                                            )
+                                          }
+                                          aria-label={`Cor ${paletteColor.label}`}
+                                          title={`Cor ${paletteColor.label}`}
+                                        />
+                                      ))}
+                                    </div>
+                                    {previousColumn && (
                                       <button
-                                        key={`${card.id}-${paletteColor.id}`}
                                         type='button'
-                                        className={`kanban-color-swatch ${
-                                          card.color === paletteColor.id
-                                            ? 'is-active'
-                                            : ''
-                                        }`}
-                                        data-post-it-color={paletteColor.id}
+                                        className='btn btn-sm btn-outline-secondary'
                                         onClick={() =>
-                                          handleChangeCardColor(
+                                          handleMoveCard(
                                             rowIndex,
                                             columnId,
+                                            previousColumn,
                                             card.id,
-                                            paletteColor.id,
                                           )
                                         }
-                                        aria-label={`Cor ${paletteColor.label}`}
-                                        title={`Cor ${paletteColor.label}`}
-                                      />
-                                    ))}
+                                        aria-label='Mover cartão para a coluna anterior'
+                                      >
+                                        ←
+                                      </button>
+                                    )}
+                                    {nextColumn && (
+                                      <button
+                                        type='button'
+                                        className='btn btn-sm btn-outline-secondary'
+                                        onClick={() =>
+                                          handleMoveCard(
+                                            rowIndex,
+                                            columnId,
+                                            nextColumn,
+                                            card.id,
+                                          )
+                                        }
+                                        aria-label='Mover cartão para a próxima coluna'
+                                      >
+                                        →
+                                      </button>
+                                    )}
+                                    <button
+                                      type='button'
+                                      className='btn btn-sm btn-outline-danger'
+                                      onClick={() =>
+                                        handleDeleteCard(
+                                          rowIndex,
+                                          columnId,
+                                          card.id,
+                                        )
+                                      }
+                                      aria-label='Remover cartão'
+                                    >
+                                      ×
+                                    </button>
                                   </div>
-                                  {previousColumn && (
-                                    <button
-                                      type='button'
-                                      className='btn btn-sm btn-outline-secondary'
-                                      onClick={() =>
-                                        handleMoveCard(
-                                          rowIndex,
-                                          columnId,
-                                          previousColumn,
-                                          card.id,
-                                        )
-                                      }
-                                      aria-label='Mover cartão para a coluna anterior'
-                                    >
-                                      ←
-                                    </button>
-                                  )}
-                                  {nextColumn && (
-                                    <button
-                                      type='button'
-                                      className='btn btn-sm btn-outline-secondary'
-                                      onClick={() =>
-                                        handleMoveCard(
-                                          rowIndex,
-                                          columnId,
-                                          nextColumn,
-                                          card.id,
-                                        )
-                                      }
-                                      aria-label='Mover cartão para a próxima coluna'
-                                    >
-                                      →
-                                    </button>
-                                  )}
-                                  <button
-                                    type='button'
-                                    className='btn btn-sm btn-outline-danger'
-                                    onClick={() =>
-                                      handleDeleteCard(
-                                        rowIndex,
-                                        columnId,
-                                        card.id,
+                                </article>
+                              );
+                            })}
+
+                            {composer?.rowIndex === rowIndex &&
+                              composer?.columnId === columnId && (
+                                <div className='kanban-composer'>
+                                  <RichTextCell
+                                    id={`composer-${row.layerId}-${columnId}`}
+                                    label={`Novo cartão em ${COLUMN_LABELS[columnId]} para ${row.layerLabel}`}
+                                    value={composer.value}
+                                    onChange={(nextValue) =>
+                                      setComposer((currentComposer) =>
+                                        currentComposer
+                                          ? {
+                                              ...currentComposer,
+                                              value: nextValue,
+                                            }
+                                          : currentComposer,
                                       )
                                     }
-                                    aria-label='Remover cartão'
-                                  >
-                                    ×
-                                  </button>
+                                    placeholder='Descreva o cartão'
+                                  />
+                                  <div className='kanban-composer-actions'>
+                                    <button
+                                      type='button'
+                                      className='btn btn-sm btn-primary'
+                                      onClick={handleSaveCard}
+                                      disabled={
+                                        !hasMeaningfulContent(composer.value)
+                                      }
+                                    >
+                                      Adicionar
+                                    </button>
+                                    <button
+                                      type='button'
+                                      className='btn btn-sm btn-outline-secondary'
+                                      onClick={() => setComposer(null)}
+                                    >
+                                      Cancelar
+                                    </button>
+                                  </div>
                                 </div>
-                              </article>
-                            );
-                          })}
+                              )}
 
-                          {composer?.rowIndex === rowIndex &&
-                            composer?.columnId === columnId && (
-                              <div className='kanban-composer'>
-                                <RichTextCell
-                                  id={`composer-${row.layerId}-${columnId}`}
-                                  label={`Novo cartão em ${COLUMN_LABELS[columnId]} para ${row.layerLabel}`}
-                                  value={composer.value}
-                                  onChange={(nextValue) =>
-                                    setComposer((currentComposer) =>
-                                      currentComposer
-                                        ? {
-                                            ...currentComposer,
-                                            value: nextValue,
-                                          }
-                                        : currentComposer,
-                                    )
-                                  }
-                                  placeholder='Descreva o cartão'
-                                />
-                                <div className='kanban-composer-actions'>
-                                  <button
-                                    type='button'
-                                    className='btn btn-sm btn-primary'
-                                    onClick={handleSaveCard}
-                                    disabled={
-                                      !hasMeaningfulContent(composer.value)
-                                    }
-                                  >
-                                    Adicionar
-                                  </button>
-                                  <button
-                                    type='button'
-                                    className='btn btn-sm btn-outline-secondary'
-                                    onClick={() => setComposer(null)}
-                                  >
-                                    Cancelar
-                                  </button>
-                                </div>
-                              </div>
+                            {!(
+                              composer?.rowIndex === rowIndex &&
+                              composer?.columnId === columnId
+                            ) && (
+                              <button
+                                type='button'
+                                className='btn btn-sm btn-outline-primary kanban-add-btn'
+                                onClick={() =>
+                                  handleOpenComposer(rowIndex, columnId)
+                                }
+                              >
+                                + Novo cartão
+                              </button>
                             )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-                          {!(
-                            composer?.rowIndex === rowIndex &&
-                            composer?.columnId === columnId
-                          ) && (
-                            <button
-                              type='button'
-                              className='btn btn-sm btn-outline-primary kanban-add-btn'
-                              onClick={() =>
-                                handleOpenComposer(rowIndex, columnId)
-                              }
-                            >
-                              + Novo cartão
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div className='board-panel-footer mt-3'>
+            <small className='text-body-secondary'>
+              Dica: use as setas dos cartões para mover entre colunas.
+            </small>
+            <button
+              type='button'
+              className='btn btn-outline-secondary'
+              onClick={handleResetBoard}
+            >
+              Limpar quadro
+            </button>
+          </div>
+        </section>
 
-        <div className='mt-3'>
-          <button
-            type='button'
-            className='btn btn-outline-secondary'
-            onClick={handleResetBoard}
-          >
-            Limpar quadro
-          </button>
-        </div>
+        <footer className='app-footer'>
+          <small className='text-body-secondary'>
+            Quadro digital • MVP Kanban para análise colaborativa
+          </small>
+        </footer>
       </main>
     </div>
   );

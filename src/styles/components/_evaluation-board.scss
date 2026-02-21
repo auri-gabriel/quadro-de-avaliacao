@@ -1,11 +1,36 @@
 .app-shell {
   min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 10% -5%,
+      rgba(0, 172, 193, 0.18),
+      transparent 28%
+    ),
+    radial-gradient(circle at 95% 0%, rgba(63, 81, 181, 0.18), transparent 30%),
+    var(--bs-body-bg);
 }
 
 .board-layout {
   max-width: 1800px;
   margin-inline: auto;
   padding-inline: 1.5rem;
+}
+
+.app-topbar {
+  border-bottom: 1px solid var(--bs-border-color);
+  background: color-mix(in srgb, var(--bs-body-bg) 88%, white 12%);
+}
+
+.app-brand {
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.app-topbar-meta {
+  font-size: 0.86rem;
+  color: var(--bs-secondary-color);
 }
 
 .board-header {
@@ -16,6 +41,53 @@
     color-mix(in srgb, var(--bs-info) 55%, white 45%) 75%,
     color-mix(in srgb, var(--bs-primary) 85%, white 15%) 100%
   );
+}
+
+.board-header-grid {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.board-subtitle {
+  font-size: 1.02rem;
+  color: color-mix(in srgb, var(--bs-dark) 72%, transparent 28%);
+}
+
+.board-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  gap: 0.75rem;
+  min-width: min(100%, 450px);
+}
+
+.kpi-card {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: color-mix(in srgb, white 78%, transparent 22%);
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.kpi-label {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bs-secondary-color);
+}
+
+.kpi-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.board-panel {
+  border: 1px solid var(--bs-border-color);
+  background: color-mix(in srgb, white 78%, var(--bs-body-bg) 22%);
+  box-shadow: 0 10px 28px rgba(9, 30, 66, 0.08);
+  padding: 0.9rem;
 }
 
 .board-table-wrapper {
@@ -238,6 +310,19 @@
   border-top: 1px solid var(--bs-border-color);
 }
 
+.board-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .board-help-text {
   font-size: clamp(1.45rem, 1.35rem + 0.4vw, 1.95rem);
   line-height: 1.4;
@@ -246,6 +331,17 @@
 @media (max-width: 1199.98px) {
   .board-layout {
     padding-inline: 1rem;
+  }
+
+  .board-header-grid {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .board-kpis {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .board-group-cell {
@@ -262,5 +358,10 @@
 
   .board-help-text {
     font-size: 1.25rem;
+  }
+
+  .board-panel-footer {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
