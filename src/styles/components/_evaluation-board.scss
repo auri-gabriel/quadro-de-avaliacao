@@ -249,6 +249,17 @@
   }
 }
 
+.kanban-card-editor {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.kanban-card-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+}
+
 .kanban-card-actions {
   display: flex;
   align-items: center;

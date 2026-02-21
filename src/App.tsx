@@ -20,6 +20,13 @@ interface DragCardPayload {
   fromColumnId: ColumnId;
 }
 
+interface EditingCardState {
+  cardId: string;
+  rowIndex: number;
+  columnId: ColumnId;
+  value: string;
+}
+
 const COLUMN_ORDER: ColumnId[] = ['stakeholders', 'issues', 'ideas'];
 
 const COLUMN_LABELS: Record<ColumnId, string> = {
@@ -59,6 +66,7 @@ function hasMeaningfulContent(value: string): boolean {
 function App() {
   const [rows, setRows] = useState<EvaluationRow[]>(() => loadBoard());
   const [composer, setComposer] = useState<ComposerState | null>(null);
+  const [editingCard, setEditingCard] = useState<EditingCardState | null>(null);
   const [dragOverTarget, setDragOverTarget] = useState<{
     rowIndex: number;
     columnId: ColumnId;
@@ -113,6 +121,39 @@ function App() {
           : row,
       ),
     );
+  };
+
+  const handleStartEditingCard = (
+    rowIndex: number,
+    columnId: ColumnId,
+    cardId: string,
+    value: string,
+  ) => {
+    setEditingCard({ rowIndex, columnId, cardId, value });
+    setComposer(null);
+  };
+
+  const handleSaveEditedCard = () => {
+    if (!editingCard || !hasMeaningfulContent(editingCard.value)) {
+      return;
+    }
+
+    setRows((currentRows) =>
+      currentRows.map((row, index) =>
+        index === editingCard.rowIndex
+          ? {
+              ...row,
+              [editingCard.columnId]: row[editingCard.columnId].map((card) =>
+                card.id === editingCard.cardId
+                  ? { ...card, content: editingCard.value }
+                  : card,
+              ),
+            }
+          : row,
+      ),
+    );
+
+    setEditingCard(null);
   };
 
   const handleCardDragStart = (
@@ -258,6 +299,7 @@ function App() {
   const handleResetBoard = () => {
     setRows(createInitialBoard());
     setComposer(null);
+    setEditingCard(null);
   };
 
   const getColumnCardCount = (columnId: ColumnId): number =>
@@ -372,12 +414,17 @@ function App() {
                             }
                           >
                             {cards.map((card) => {
+                              const isEditingCurrentCard =
+                                editingCard?.cardId === card.id &&
+                                editingCard.rowIndex === rowIndex &&
+                                editingCard.columnId === columnId;
+
                               return (
                                 <article
                                   className='kanban-card'
                                   key={card.id}
                                   data-post-it-color={card.color}
-                                  draggable
+                                  draggable={!isEditingCurrentCard}
                                   onDragStart={(event) =>
                                     handleCardDragStart(
                                       event,
@@ -388,12 +435,55 @@ function App() {
                                   }
                                   onDragEnd={handleCardDragEnd}
                                 >
-                                  <div
-                                    className='kanban-card-content'
-                                    dangerouslySetInnerHTML={{
-                                      __html: card.content,
-                                    }}
-                                  />
+                                  {isEditingCurrentCard ? (
+                                    <div className='kanban-card-editor'>
+                                      <RichTextCell
+                                        id={`edit-${card.id}`}
+                                        label='Editar cartão'
+                                        value={editingCard.value}
+                                        onChange={(nextValue) =>
+                                          setEditingCard(
+                                            (currentEditingCard) =>
+                                              currentEditingCard
+                                                ? {
+                                                    ...currentEditingCard,
+                                                    value: nextValue,
+                                                  }
+                                                : currentEditingCard,
+                                          )
+                                        }
+                                        placeholder='Edite o conteúdo do cartão'
+                                      />
+                                      <div className='kanban-card-editor-actions'>
+                                        <button
+                                          type='button'
+                                          className='btn btn-sm btn-primary'
+                                          onClick={handleSaveEditedCard}
+                                          disabled={
+                                            !hasMeaningfulContent(
+                                              editingCard.value,
+                                            )
+                                          }
+                                        >
+                                          Salvar
+                                        </button>
+                                        <button
+                                          type='button'
+                                          className='btn btn-sm btn-outline-secondary'
+                                          onClick={() => setEditingCard(null)}
+                                        >
+                                          Cancelar
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className='kanban-card-content'
+                                      dangerouslySetInnerHTML={{
+                                        __html: card.content,
+                                      }}
+                                    />
+                                  )}
                                   <div className='kanban-card-actions'>
                                     <div
                                       className='kanban-color-palette'
@@ -423,6 +513,21 @@ function App() {
                                         />
                                       ))}
                                     </div>
+                                    <button
+                                      type='button'
+                                      className='btn btn-sm btn-outline-secondary'
+                                      onClick={() =>
+                                        handleStartEditingCard(
+                                          rowIndex,
+                                          columnId,
+                                          card.id,
+                                          card.content,
+                                        )
+                                      }
+                                      disabled={isEditingCurrentCard}
+                                    >
+                                      Editar
+                                    </button>
                                     <button
                                       type='button'
                                       className='btn btn-sm btn-outline-danger'
