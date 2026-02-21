@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { type DragEvent, useEffect, useState } from 'react';
 import { RichTextCell } from './components/RichTextCell';
 import { createInitialBoard, loadBoard, saveBoard } from './lib/boardStorage';
 import {
@@ -12,6 +12,12 @@ interface ComposerState {
   rowIndex: number;
   columnId: ColumnId;
   value: string;
+}
+
+interface DragCardPayload {
+  cardId: string;
+  fromRowIndex: number;
+  fromColumnId: ColumnId;
 }
 
 const COLUMN_ORDER: ColumnId[] = ['stakeholders', 'issues', 'ideas'];
@@ -53,6 +59,10 @@ function hasMeaningfulContent(value: string): boolean {
 function App() {
   const [rows, setRows] = useState<EvaluationRow[]>(() => loadBoard());
   const [composer, setComposer] = useState<ComposerState | null>(null);
+  const [dragOverTarget, setDragOverTarget] = useState<{
+    rowIndex: number;
+    columnId: ColumnId;
+  } | null>(null);
 
   useEffect(() => {
     saveBoard(rows);
@@ -105,36 +115,124 @@ function App() {
     );
   };
 
-  const handleMoveCard = (
-    rowIndex: number,
+  const handleCardDragStart = (
+    event: DragEvent<HTMLElement>,
+    fromRowIndex: number,
     fromColumnId: ColumnId,
-    toColumnId: ColumnId,
     cardId: string,
   ) => {
-    if (fromColumnId === toColumnId) {
-      return;
+    const payload: DragCardPayload = {
+      cardId,
+      fromRowIndex,
+      fromColumnId,
+    };
+
+    event.dataTransfer.setData('application/json', JSON.stringify(payload));
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleCardDragEnd = () => {
+    setDragOverTarget(null);
+  };
+
+  const handleCellDragOver = (
+    event: DragEvent<HTMLDivElement>,
+    rowIndex: number,
+    columnId: ColumnId,
+  ) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+
+    if (
+      !dragOverTarget ||
+      dragOverTarget.rowIndex !== rowIndex ||
+      dragOverTarget.columnId !== columnId
+    ) {
+      setDragOverTarget({ rowIndex, columnId });
+    }
+  };
+
+  const moveCardToTarget = (
+    currentRows: EvaluationRow[],
+    payload: DragCardPayload,
+    toRowIndex: number,
+    toColumnId: ColumnId,
+  ): EvaluationRow[] => {
+    const sourceRow = currentRows[payload.fromRowIndex];
+    if (!sourceRow) {
+      return currentRows;
     }
 
-    setRows((currentRows) =>
-      currentRows.map((row, index) => {
-        if (index !== rowIndex) {
-          return row;
-        }
-
-        const card = row[fromColumnId].find((item) => item.id === cardId);
-        if (!card) {
-          return row;
-        }
-
-        return {
-          ...row,
-          [fromColumnId]: row[fromColumnId].filter(
-            (item) => item.id !== cardId,
-          ),
-          [toColumnId]: [...row[toColumnId], card],
-        };
-      }),
+    const cardToMove = sourceRow[payload.fromColumnId].find(
+      (card) => card.id === payload.cardId,
     );
+    if (!cardToMove) {
+      return currentRows;
+    }
+
+    if (
+      payload.fromRowIndex === toRowIndex &&
+      payload.fromColumnId === toColumnId
+    ) {
+      return currentRows;
+    }
+
+    return currentRows.map((row, rowIndex) => {
+      const nextRow = { ...row };
+
+      if (rowIndex === payload.fromRowIndex) {
+        nextRow[payload.fromColumnId] = row[payload.fromColumnId].filter(
+          (card) => card.id !== payload.cardId,
+        );
+      }
+
+      if (rowIndex === toRowIndex) {
+        nextRow[toColumnId] = [...nextRow[toColumnId], cardToMove];
+      }
+
+      return nextRow;
+    });
+  };
+
+  const handleCellDrop = (
+    event: DragEvent<HTMLDivElement>,
+    toRowIndex: number,
+    toColumnId: ColumnId,
+  ) => {
+    event.preventDefault();
+
+    try {
+      const raw = event.dataTransfer.getData('application/json');
+      if (!raw) {
+        return;
+      }
+
+      const payload = JSON.parse(raw) as DragCardPayload;
+      setRows((currentRows) =>
+        moveCardToTarget(currentRows, payload, toRowIndex, toColumnId),
+      );
+    } catch {
+      // Ignore malformed drag payloads
+    } finally {
+      setDragOverTarget(null);
+    }
+  };
+
+  const handleCellDragLeave = (
+    event: DragEvent<HTMLDivElement>,
+    rowIndex: number,
+    columnId: ColumnId,
+  ) => {
+    const nextTarget = event.relatedTarget as Node | null;
+    if (!nextTarget || !event.currentTarget.contains(nextTarget)) {
+      if (
+        dragOverTarget &&
+        dragOverTarget.rowIndex === rowIndex &&
+        dragOverTarget.columnId === columnId
+      ) {
+        setDragOverTarget(null);
+      }
+    }
   };
 
   const handleChangeCardColor = (
@@ -255,24 +353,40 @@ function App() {
 
                       return (
                         <td key={`${row.layerId}-${columnId}`}>
-                          <div className='kanban-cell'>
+                          <div
+                            className='kanban-cell'
+                            onDragOver={(event) =>
+                              handleCellDragOver(event, rowIndex, columnId)
+                            }
+                            onDrop={(event) =>
+                              handleCellDrop(event, rowIndex, columnId)
+                            }
+                            onDragLeave={(event) =>
+                              handleCellDragLeave(event, rowIndex, columnId)
+                            }
+                            data-drop-target={
+                              dragOverTarget?.rowIndex === rowIndex &&
+                              dragOverTarget?.columnId === columnId
+                                ? 'true'
+                                : 'false'
+                            }
+                          >
                             {cards.map((card) => {
-                              const columnIndex =
-                                COLUMN_ORDER.indexOf(columnId);
-                              const previousColumn =
-                                columnIndex > 0
-                                  ? COLUMN_ORDER[columnIndex - 1]
-                                  : null;
-                              const nextColumn =
-                                columnIndex < COLUMN_ORDER.length - 1
-                                  ? COLUMN_ORDER[columnIndex + 1]
-                                  : null;
-
                               return (
                                 <article
                                   className='kanban-card'
                                   key={card.id}
                                   data-post-it-color={card.color}
+                                  draggable
+                                  onDragStart={(event) =>
+                                    handleCardDragStart(
+                                      event,
+                                      rowIndex,
+                                      columnId,
+                                      card.id,
+                                    )
+                                  }
+                                  onDragEnd={handleCardDragEnd}
                                 >
                                   <div
                                     className='kanban-card-content'
@@ -309,40 +423,6 @@ function App() {
                                         />
                                       ))}
                                     </div>
-                                    {previousColumn && (
-                                      <button
-                                        type='button'
-                                        className='btn btn-sm btn-outline-secondary'
-                                        onClick={() =>
-                                          handleMoveCard(
-                                            rowIndex,
-                                            columnId,
-                                            previousColumn,
-                                            card.id,
-                                          )
-                                        }
-                                        aria-label='Mover cartão para a coluna anterior'
-                                      >
-                                        ←
-                                      </button>
-                                    )}
-                                    {nextColumn && (
-                                      <button
-                                        type='button'
-                                        className='btn btn-sm btn-outline-secondary'
-                                        onClick={() =>
-                                          handleMoveCard(
-                                            rowIndex,
-                                            columnId,
-                                            nextColumn,
-                                            card.id,
-                                          )
-                                        }
-                                        aria-label='Mover cartão para a próxima coluna'
-                                      >
-                                        →
-                                      </button>
-                                    )}
                                     <button
                                       type='button'
                                       className='btn btn-sm btn-outline-danger'
@@ -429,7 +509,7 @@ function App() {
 
           <div className='board-panel-footer mt-3'>
             <small className='text-body-secondary'>
-              Dica: use as setas dos cartões para mover entre colunas.
+              Dica: arraste e solte os cartões entre qualquer linha e coluna.
             </small>
             <button
               type='button'

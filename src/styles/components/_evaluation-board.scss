@@ -160,6 +160,15 @@
   min-height: 190px;
   padding: 0.5rem;
   background: var(--bs-tertiary-bg);
+  transition: background-color 0.15s ease;
+
+  &[data-drop-target='true'] {
+    background: color-mix(
+      in srgb,
+      var(--bs-primary) 14%,
+      var(--bs-tertiary-bg)
+    );
+  }
 }
 
 .kanban-card {
@@ -168,6 +177,7 @@
   border: 1px solid var(--bs-border-color);
   box-shadow: 0 2px 6px rgba(9, 30, 66, 0.2);
   transition: box-shadow 0.15s ease;
+  cursor: grab;
 
   &[data-post-it-color='yellow'] {
     background: #fff59d;
@@ -201,6 +211,10 @@
 
   &:hover {
     box-shadow: 0 4px 10px rgba(9, 30, 66, 0.24);
+  }
+
+  &:active {
+    cursor: grabbing;
   }
 }
 
