@@ -25,6 +25,10 @@ interface BoardHeaderProps {
   onCreateProjectVersion: () => void;
   onDeleteProject: () => void;
   canDeleteProject: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
   projectDraft: ProjectMetadataDraft;
   isProjectDraftDirty: boolean;
   onChangeProjectDraftField: (field: ProjectDraftField, value: string) => void;
@@ -48,6 +52,10 @@ export function BoardHeader({
   onCreateProjectVersion,
   onDeleteProject,
   canDeleteProject,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
   projectDraft,
   isProjectDraftDirty,
   onChangeProjectDraftField,
@@ -250,6 +258,30 @@ export function BoardHeader({
                   : 'Dados do projeto sincronizados.'}
               </small>
               <div className='project-manager-footer-actions'>
+                <button
+                  type='button'
+                  className='btn btn-sm btn-outline-secondary'
+                  onClick={onUndo}
+                  disabled={!canUndo}
+                >
+                  <i
+                    className='bi bi-arrow-counterclockwise me-1'
+                    aria-hidden='true'
+                  />
+                  Desfazer
+                </button>
+                <button
+                  type='button'
+                  className='btn btn-sm btn-outline-secondary'
+                  onClick={onRedo}
+                  disabled={!canRedo}
+                >
+                  <i
+                    className='bi bi-arrow-clockwise me-1'
+                    aria-hidden='true'
+                  />
+                  Refazer
+                </button>
                 <button
                   type='button'
                   className='btn btn-sm btn-outline-secondary'

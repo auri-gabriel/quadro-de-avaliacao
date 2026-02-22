@@ -1,4 +1,11 @@
-import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { AppTopbar } from './components/AppTopbar';
 import { AppDialogModal } from './components/AppDialogModal';
 import { BoardHeader } from './components/BoardHeader';
@@ -7,7 +14,10 @@ import { useAppDialog } from './hooks/useAppDialog';
 import { parseBoardRows } from './lib/boardStorage';
 import { useBoardCards } from './hooks/useBoardCards';
 import { useBoardDnd } from './hooks/useBoardDnd';
-import { useBoardWorkspace } from './hooks/useBoardWorkspace';
+import {
+  useBoardWorkspace,
+  type UpdateActiveProject,
+} from './hooks/useBoardWorkspace';
 import {
   type ColumnId,
   type EvaluationProject,
@@ -76,6 +86,14 @@ function getImportedProjectPayload(
   return candidate as ImportedProjectPayload;
 }
 
+function cloneProjectSnapshot(project: EvaluationProject): EvaluationProject {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(project);
+  }
+
+  return JSON.parse(JSON.stringify(project)) as EvaluationProject;
+}
+
 function App() {
   const {
     workspace,
@@ -88,6 +106,28 @@ function App() {
     deleteActiveProject,
     importProjectAsNew,
   } = useBoardWorkspace();
+  const [undoStack, setUndoStack] = useState<EvaluationProject[]>([]);
+  const [redoStack, setRedoStack] = useState<EvaluationProject[]>([]);
+  const isTimeTravelingRef = useRef(false);
+
+  const updateActiveProjectWithHistory: UpdateActiveProject = useCallback(
+    (updater) => {
+      updateActiveProject((currentProject) => {
+        const nextProject = updater(currentProject);
+
+        if (!isTimeTravelingRef.current) {
+          setUndoStack((currentUndoStack) => [
+            ...currentUndoStack,
+            cloneProjectSnapshot(currentProject),
+          ]);
+          setRedoStack([]);
+        }
+
+        return nextProject;
+      });
+    },
+    [updateActiveProject],
+  );
   const {
     composer,
     editingCard,
@@ -102,7 +142,7 @@ function App() {
     handleChangeCardColor,
     handleResetBoard,
     hasMeaningfulContent,
-  } = useBoardCards({ updateActiveProject });
+  } = useBoardCards({ updateActiveProject: updateActiveProjectWithHistory });
   const {
     dragOverTarget,
     clearDragState,
@@ -111,7 +151,7 @@ function App() {
     handleCellDragOver,
     handleCellDrop,
     handleCellDragLeave,
-  } = useBoardDnd({ updateActiveProject });
+  } = useBoardDnd({ updateActiveProject: updateActiveProjectWithHistory });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { modalState, openDialog, closeDialog, showInfoDialog } =
     useAppDialog();
@@ -133,6 +173,11 @@ function App() {
     setProjectDraft(activeProjectMetadata);
   }, [activeProjectMetadata]);
 
+  useEffect(() => {
+    setUndoStack([]);
+    setRedoStack([]);
+  }, [activeProject?.id]);
+
   const isProjectDraftDirty =
     projectDraft.name !== activeProjectMetadata.name ||
     projectDraft.focalProblem !== activeProjectMetadata.focalProblem ||
@@ -143,7 +188,7 @@ function App() {
       return;
     }
 
-    updateActiveProject((currentProject) => ({
+    updateActiveProjectWithHistory((currentProject) => ({
       ...currentProject,
       name: projectDraft.name,
       focalProblem: projectDraft.focalProblem,
@@ -383,6 +428,54 @@ function App() {
     fileInputRef.current?.click();
   };
 
+  const handleUndo = () => {
+    if (!activeProject || undoStack.length === 0) {
+      return;
+    }
+
+    const previousSnapshot = undoStack[undoStack.length - 1];
+    if (!previousSnapshot) {
+      return;
+    }
+
+    setUndoStack((currentUndoStack) => currentUndoStack.slice(0, -1));
+    setRedoStack((currentRedoStack) => [
+      ...currentRedoStack,
+      cloneProjectSnapshot(activeProject),
+    ]);
+
+    isTimeTravelingRef.current = true;
+    updateActiveProject(() => cloneProjectSnapshot(previousSnapshot));
+    isTimeTravelingRef.current = false;
+
+    clearCardUiState();
+    clearDragState();
+  };
+
+  const handleRedo = () => {
+    if (!activeProject || redoStack.length === 0) {
+      return;
+    }
+
+    const nextSnapshot = redoStack[redoStack.length - 1];
+    if (!nextSnapshot) {
+      return;
+    }
+
+    setRedoStack((currentRedoStack) => currentRedoStack.slice(0, -1));
+    setUndoStack((currentUndoStack) => [
+      ...currentUndoStack,
+      cloneProjectSnapshot(activeProject),
+    ]);
+
+    isTimeTravelingRef.current = true;
+    updateActiveProject(() => cloneProjectSnapshot(nextSnapshot));
+    isTimeTravelingRef.current = false;
+
+    clearCardUiState();
+    clearDragState();
+  };
+
   const handleImportBoard = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -461,7 +554,7 @@ function App() {
         return;
       }
 
-      updateActiveProject((currentProject) => ({
+      updateActiveProjectWithHistory((currentProject) => ({
         ...currentProject,
         name:
           typeof importedProjectPayload?.projectName === 'string'
@@ -564,6 +657,10 @@ function App() {
           void handleRequestDeleteProject();
         }}
         canDeleteProject={workspace.projects.length > 1}
+        canUndo={undoStack.length > 0}
+        canRedo={redoStack.length > 0}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
         projectDraft={projectDraft}
         isProjectDraftDirty={isProjectDraftDirty}
         onChangeProjectDraftField={(field, value) => {
