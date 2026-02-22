@@ -1,6 +1,14 @@
 import { type ChangeEvent, type RefObject } from 'react';
 import type { EvaluationProject, EvaluationWorkspace } from '../types/board';
 
+type ProjectDraftField = 'name' | 'focalProblem' | 'author';
+
+interface ProjectMetadataDraft {
+  name: string;
+  focalProblem: string;
+  author: string;
+}
+
 interface BoardHeaderProps {
   totalCards: number;
   activeLayers: number;
@@ -12,15 +20,16 @@ interface BoardHeaderProps {
   onOpenFilePicker: () => void;
   onExportBoard: () => void;
   onResetBoard: () => void;
-  onSelectProject: (event: ChangeEvent<HTMLSelectElement>) => void;
+  onSelectProject: (projectId: string) => void;
   onCreateProject: () => void;
   onCreateProjectVersion: () => void;
   onDeleteProject: () => void;
   canDeleteProject: boolean;
-  onUpdateProjectField: (
-    field: 'name' | 'focalProblem' | 'author',
-    value: string,
-  ) => void;
+  projectDraft: ProjectMetadataDraft;
+  isProjectDraftDirty: boolean;
+  onChangeProjectDraftField: (field: ProjectDraftField, value: string) => void;
+  onSaveProjectDraft: () => void;
+  onCancelProjectDraft: () => void;
 }
 
 export function BoardHeader({
@@ -39,7 +48,11 @@ export function BoardHeader({
   onCreateProjectVersion,
   onDeleteProject,
   canDeleteProject,
-  onUpdateProjectField,
+  projectDraft,
+  isProjectDraftDirty,
+  onChangeProjectDraftField,
+  onSaveProjectDraft,
+  onCancelProjectDraft,
 }: BoardHeaderProps) {
   return (
     <section className='board-header'>
@@ -98,15 +111,7 @@ export function BoardHeader({
                   onClick={onExportBoard}
                 >
                   <i className='bi bi-download me-1' aria-hidden='true' />
-                  Salvar arquivo
-                </button>
-                <button
-                  type='button'
-                  className='btn btn-outline-secondary'
-                  onClick={onResetBoard}
-                >
-                  <i className='bi bi-eraser me-1' aria-hidden='true' />
-                  Limpar quadro
+                  Exportar JSON
                 </button>
               </div>
             </div>
@@ -120,7 +125,7 @@ export function BoardHeader({
                   id='project-select'
                   className='form-select form-select-sm'
                   value={activeProject?.id ?? ''}
-                  onChange={onSelectProject}
+                  onChange={(event) => onSelectProject(event.target.value)}
                 >
                   {workspace.projects.map((project) => (
                     <option key={project.id} value={project.id}>
@@ -145,15 +150,6 @@ export function BoardHeader({
                   <i className='bi bi-copy me-1' aria-hidden='true' />
                   Nova versão
                 </button>
-                <button
-                  type='button'
-                  className='btn btn-sm btn-outline-danger'
-                  onClick={onDeleteProject}
-                  disabled={!canDeleteProject}
-                >
-                  <i className='bi bi-trash me-1' aria-hidden='true' />
-                  Excluir projeto
-                </button>
               </div>
             </div>
 
@@ -165,9 +161,10 @@ export function BoardHeader({
                 <input
                   id='project-name'
                   className='form-control form-control-sm'
-                  value={activeProject?.name ?? ''}
+                  value={projectDraft.name}
+                  disabled={!activeProject}
                   onChange={(event) =>
-                    onUpdateProjectField('name', event.target.value)
+                    onChangeProjectDraftField('name', event.target.value)
                   }
                   placeholder='Nome do projeto'
                 />
@@ -179,9 +176,10 @@ export function BoardHeader({
                 <input
                   id='project-author'
                   className='form-control form-control-sm'
-                  value={activeProject?.author ?? ''}
+                  value={projectDraft.author}
+                  disabled={!activeProject}
                   onChange={(event) =>
-                    onUpdateProjectField('author', event.target.value)
+                    onChangeProjectDraftField('author', event.target.value)
                   }
                   placeholder='Nome do autor'
                 />
@@ -193,12 +191,68 @@ export function BoardHeader({
                 <input
                   id='project-focal'
                   className='form-control form-control-sm'
-                  value={activeProject?.focalProblem ?? ''}
+                  value={projectDraft.focalProblem}
+                  disabled={!activeProject}
                   onChange={(event) =>
-                    onUpdateProjectField('focalProblem', event.target.value)
+                    onChangeProjectDraftField(
+                      'focalProblem',
+                      event.target.value,
+                    )
                   }
                   placeholder='Descreva o problema focal'
                 />
+              </div>
+            </div>
+
+            <div className='project-manager-footer'>
+              <small className='text-body-secondary'>
+                {isProjectDraftDirty
+                  ? 'Existem alterações não salvas nos dados do projeto.'
+                  : 'Dados do projeto sincronizados.'}
+              </small>
+              <div className='project-manager-footer-actions'>
+                <button
+                  type='button'
+                  className='btn btn-sm btn-outline-secondary'
+                  onClick={onCancelProjectDraft}
+                  disabled={!isProjectDraftDirty}
+                >
+                  Cancelar alterações
+                </button>
+                <button
+                  type='button'
+                  className='btn btn-sm btn-primary'
+                  onClick={onSaveProjectDraft}
+                  disabled={!isProjectDraftDirty}
+                >
+                  <i className='bi bi-check2 me-1' aria-hidden='true' />
+                  Salvar dados
+                </button>
+              </div>
+            </div>
+
+            <div className='project-manager-danger-zone'>
+              <span className='project-manager-danger-label'>
+                Ações destrutivas
+              </span>
+              <div className='project-manager-danger-actions'>
+                <button
+                  type='button'
+                  className='btn btn-sm btn-outline-danger'
+                  onClick={onResetBoard}
+                >
+                  <i className='bi bi-eraser me-1' aria-hidden='true' />
+                  Limpar quadro
+                </button>
+                <button
+                  type='button'
+                  className='btn btn-sm btn-outline-danger'
+                  onClick={onDeleteProject}
+                  disabled={!canDeleteProject}
+                >
+                  <i className='bi bi-trash me-1' aria-hidden='true' />
+                  Excluir projeto
+                </button>
               </div>
             </div>
           </div>

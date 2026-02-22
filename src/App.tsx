@@ -1,4 +1,4 @@
-import { type ChangeEvent, useRef } from 'react';
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { AppTopbar } from './components/AppTopbar';
 import { AppDialogModal } from './components/AppDialogModal';
 import { BoardHeader } from './components/BoardHeader';
@@ -37,6 +37,12 @@ interface ImportedProjectPayload {
   author?: unknown;
   projectVersion?: unknown;
   rows?: unknown;
+}
+
+interface ProjectMetadataDraft {
+  name: string;
+  focalProblem: string;
+  author: string;
 }
 
 function createExportFileName(project: EvaluationProject): string {
@@ -80,7 +86,6 @@ function App() {
     createNewProject,
     createNewVersion,
     deleteActiveProject,
-    updateActiveProjectField,
     importProjectAsNew,
   } = useBoardWorkspace();
   const {
@@ -111,19 +116,119 @@ function App() {
   const { modalState, openDialog, closeDialog, showInfoDialog } =
     useAppDialog();
 
-  const handleSelectProject = (event: ChangeEvent<HTMLSelectElement>) => {
-    selectProject(event);
+  const activeProjectMetadata = useMemo<ProjectMetadataDraft>(
+    () => ({
+      name: activeProject?.name ?? '',
+      focalProblem: activeProject?.focalProblem ?? '',
+      author: activeProject?.author ?? '',
+    }),
+    [activeProject?.author, activeProject?.focalProblem, activeProject?.name],
+  );
+
+  const [projectDraft, setProjectDraft] = useState<ProjectMetadataDraft>(
+    activeProjectMetadata,
+  );
+
+  useEffect(() => {
+    setProjectDraft(activeProjectMetadata);
+  }, [activeProjectMetadata]);
+
+  const isProjectDraftDirty =
+    projectDraft.name !== activeProjectMetadata.name ||
+    projectDraft.focalProblem !== activeProjectMetadata.focalProblem ||
+    projectDraft.author !== activeProjectMetadata.author;
+
+  const saveProjectDraft = () => {
+    if (!activeProject) {
+      return;
+    }
+
+    updateActiveProject((currentProject) => ({
+      ...currentProject,
+      name: projectDraft.name,
+      focalProblem: projectDraft.focalProblem,
+      author: projectDraft.author,
+    }));
+  };
+
+  const cancelProjectDraft = () => {
+    setProjectDraft(activeProjectMetadata);
+  };
+
+  const resolveProjectDraftBeforeContinue = async (): Promise<
+    'clean' | 'saved' | 'discarded' | 'cancel'
+  > => {
+    if (!isProjectDraftDirty) {
+      return 'clean';
+    }
+
+    const choice = await openDialog(
+      'Alterações não salvas',
+      'Você alterou os dados do projeto. Deseja salvar antes de continuar?',
+      [
+        {
+          value: 'save',
+          label: 'Salvar e continuar',
+          buttonClassName: 'btn-primary',
+        },
+        {
+          value: 'discard',
+          label: 'Descartar alterações',
+          buttonClassName: 'btn-outline-secondary',
+        },
+        {
+          value: 'cancel',
+          label: 'Cancelar',
+          buttonClassName: 'btn-outline-secondary',
+        },
+      ],
+    );
+
+    if (choice === 'save') {
+      saveProjectDraft();
+      return 'saved';
+    }
+
+    if (choice === 'discard') {
+      cancelProjectDraft();
+      return 'discarded';
+    }
+
+    return 'cancel';
+  };
+
+  const handleSelectProject = async (projectId: string) => {
+    if (!activeProject || activeProject.id === projectId) {
+      return;
+    }
+
+    const resolution = await resolveProjectDraftBeforeContinue();
+    if (resolution === 'cancel') {
+      return;
+    }
+
+    selectProject(projectId);
     clearCardUiState();
     clearDragState();
   };
 
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
+    const resolution = await resolveProjectDraftBeforeContinue();
+    if (resolution === 'cancel') {
+      return;
+    }
+
     createNewProject();
     clearCardUiState();
     clearDragState();
   };
 
-  const handleCreateProjectVersion = () => {
+  const handleCreateProjectVersion = async () => {
+    const resolution = await resolveProjectDraftBeforeContinue();
+    if (resolution === 'cancel') {
+      return;
+    }
+
     createNewVersion();
     clearCardUiState();
     clearDragState();
@@ -131,6 +236,11 @@ function App() {
 
   const handleRequestDeleteProject = async () => {
     if (!activeProject) {
+      return;
+    }
+
+    const resolution = await resolveProjectDraftBeforeContinue();
+    if (resolution === 'cancel') {
       return;
     }
 
@@ -194,28 +304,36 @@ function App() {
     clearDragState();
   };
 
-  const handleUpdateActiveProjectField = (
-    field: 'name' | 'focalProblem' | 'author',
-    value: string,
-  ) => {
-    updateActiveProjectField(field, value);
-  };
-
-  const handleExportBoard = () => {
+  const handleExportBoard = async () => {
     if (!activeProject) {
       return;
     }
+
+    const resolution = await resolveProjectDraftBeforeContinue();
+    if (resolution === 'cancel') {
+      return;
+    }
+
+    const exportProject =
+      resolution === 'saved'
+        ? {
+            ...activeProject,
+            name: projectDraft.name,
+            focalProblem: projectDraft.focalProblem,
+            author: projectDraft.author,
+          }
+        : activeProject;
 
     const payload = {
       app: 'quadro-de-avaliacao',
       schemaVersion: 2,
       exportedAt: new Date().toISOString(),
-      projectId: activeProject.id,
-      projectName: activeProject.name,
-      focalProblem: activeProject.focalProblem,
-      author: activeProject.author,
-      projectVersion: activeProject.version,
-      rows: activeProject.rows,
+      projectId: exportProject.id,
+      projectName: exportProject.name,
+      focalProblem: exportProject.focalProblem,
+      author: exportProject.author,
+      projectVersion: exportProject.version,
+      rows: exportProject.rows,
     };
 
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -225,7 +343,7 @@ function App() {
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = createExportFileName(activeProject);
+    link.download = createExportFileName(exportProject);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -243,6 +361,11 @@ function App() {
     }
 
     try {
+      const resolution = await resolveProjectDraftBeforeContinue();
+      if (resolution === 'cancel') {
+        return;
+      }
+
       const content = await file.text();
       const parsed = JSON.parse(content) as unknown;
 
@@ -393,18 +516,35 @@ function App() {
         fileInputRef={fileInputRef}
         onImportBoard={handleImportBoard}
         onOpenFilePicker={handleOpenFilePicker}
-        onExportBoard={handleExportBoard}
+        onExportBoard={() => {
+          void handleExportBoard();
+        }}
         onResetBoard={() => {
           void handleRequestResetBoard();
         }}
-        onSelectProject={handleSelectProject}
-        onCreateProject={handleCreateProject}
-        onCreateProjectVersion={handleCreateProjectVersion}
+        onSelectProject={(projectId) => {
+          void handleSelectProject(projectId);
+        }}
+        onCreateProject={() => {
+          void handleCreateProject();
+        }}
+        onCreateProjectVersion={() => {
+          void handleCreateProjectVersion();
+        }}
         onDeleteProject={() => {
           void handleRequestDeleteProject();
         }}
         canDeleteProject={workspace.projects.length > 1}
-        onUpdateProjectField={handleUpdateActiveProjectField}
+        projectDraft={projectDraft}
+        isProjectDraftDirty={isProjectDraftDirty}
+        onChangeProjectDraftField={(field, value) => {
+          setProjectDraft((currentDraft) => ({
+            ...currentDraft,
+            [field]: value,
+          }));
+        }}
+        onSaveProjectDraft={saveProjectDraft}
+        onCancelProjectDraft={cancelProjectDraft}
       />
 
       <main className='container-fluid board-layout py-4 py-md-5'>

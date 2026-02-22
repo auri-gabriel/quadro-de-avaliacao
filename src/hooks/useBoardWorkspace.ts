@@ -1,4 +1,4 @@
-import { type ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   createInitialBoard,
   createProject,
@@ -75,8 +75,7 @@ export function useBoardWorkspace() {
     saveWorkspace(workspace);
   }, [workspace]);
 
-  const selectProject = (event: ChangeEvent<HTMLSelectElement>) => {
-    const nextProjectId = event.target.value;
+  const selectProject = (nextProjectId: string) => {
     if (!workspace.projects.some((project) => project.id === nextProjectId)) {
       return;
     }

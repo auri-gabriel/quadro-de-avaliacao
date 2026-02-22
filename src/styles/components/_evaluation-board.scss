@@ -82,7 +82,7 @@
 
 .project-manager-actions {
   display: grid;
-  grid-template-columns: minmax(170px, 1fr) auto auto auto;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
   gap: 0.5rem;
   align-items: center;
 }
@@ -96,6 +96,54 @@
 
 .project-manager-focal {
   grid-column: 1 / -1;
+}
+
+.project-manager-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid
+    color-mix(in srgb, var(--bs-border-color) 88%, transparent 12%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.project-manager-footer-actions {
+  display: inline-flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.project-manager-danger-zone {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed
+    color-mix(in srgb, var(--bs-danger) 42%, var(--bs-border-color) 58%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.project-manager-danger-label {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: color-mix(
+    in srgb,
+    var(--bs-danger) 66%,
+    var(--bs-secondary-color) 34%
+  );
+  font-weight: 600;
+}
+
+.project-manager-danger-actions {
+  display: inline-flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .board-kpis {
@@ -454,7 +502,7 @@
 
 @media (max-width: 1399.98px) {
   .project-manager-actions {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .project-manager-actions .form-select {
@@ -488,6 +536,18 @@
 
   .project-manager-grid {
     grid-template-columns: 1fr;
+  }
+
+  .project-manager-footer,
+  .project-manager-danger-zone {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .project-manager-footer-actions,
+  .project-manager-danger-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .board-group-cell {
