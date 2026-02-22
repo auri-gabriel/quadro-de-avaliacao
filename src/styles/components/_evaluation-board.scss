@@ -426,6 +426,10 @@
   &:active {
     cursor: grabbing;
   }
+
+  &:focus-within {
+    box-shadow: 0 4px 10px rgba(9, 30, 66, 0.24);
+  }
 }
 
 .kanban-card-content {
@@ -467,11 +471,8 @@
 .kanban-card-actions {
   display: flex;
   align-items: center;
-  align-content: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  row-gap: 0.5rem;
-  column-gap: 0.5rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
   background: color-mix(in srgb, white 30%, transparent 70%);
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   margin-top: 0.25rem;
@@ -483,6 +484,27 @@
     justify-content: center;
     line-height: 1;
   }
+}
+
+.kanban-card-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(2px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    visibility 0s linear 0.15s;
+}
+
+.kanban-card:hover .kanban-card-action-secondary,
+.kanban-card:focus-within .kanban-card-action-secondary {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
 }
 
 .kanban-color-palette {
@@ -529,7 +551,21 @@
 }
 
 .kanban-add-btn {
-  align-self: flex-start;
+  align-self: stretch;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  border-width: 1px;
+}
+
+.kanban-add-btn:focus-visible,
+.kanban-card-actions .btn:focus-visible,
+.kanban-color-swatch:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
 }
 
 .kanban-composer {
@@ -714,5 +750,21 @@
     color: var(--bs-secondary-color);
     text-transform: uppercase;
     letter-spacing: 0.02em;
+  }
+
+  .kanban-card-action-secondary {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (hover: none) {
+  .kanban-card-action-secondary {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: none;
   }
 }

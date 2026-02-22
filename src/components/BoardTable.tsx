@@ -232,66 +232,68 @@ export function BoardTable({
                                 />
                               )}
                               <div className='kanban-card-actions'>
-                                <div
-                                  className='kanban-color-palette'
-                                  role='group'
-                                  aria-label='Selecionar cor do post-it'
-                                >
-                                  {postItPalette.map((paletteColor) => (
-                                    <button
-                                      key={`${card.id}-${paletteColor.id}`}
-                                      type='button'
-                                      className={`kanban-color-swatch ${
-                                        card.color === paletteColor.id
-                                          ? 'is-active'
-                                          : ''
-                                      }`}
-                                      data-post-it-color={paletteColor.id}
-                                      onClick={() =>
-                                        onChangeCardColor(
-                                          rowIndex,
-                                          columnId,
-                                          card.id,
-                                          paletteColor.id,
-                                        )
-                                      }
-                                      aria-label={`Cor ${paletteColor.label}`}
-                                      title={`Cor ${paletteColor.label}`}
+                                <div className='kanban-card-action-secondary'>
+                                  <button
+                                    type='button'
+                                    className='btn btn-sm btn-outline-secondary'
+                                    onClick={() =>
+                                      onStartEditingCard(
+                                        rowIndex,
+                                        columnId,
+                                        card.id,
+                                        card.content,
+                                      )
+                                    }
+                                    disabled={editingCurrentCard}
+                                  >
+                                    <i
+                                      className='bi bi-pencil-square me-1'
+                                      aria-hidden='true'
                                     />
-                                  ))}
+                                    Editar
+                                  </button>
+                                  <div
+                                    className='kanban-color-palette'
+                                    role='group'
+                                    aria-label='Selecionar cor do post-it'
+                                  >
+                                    {postItPalette.map((paletteColor) => (
+                                      <button
+                                        key={`${card.id}-${paletteColor.id}`}
+                                        type='button'
+                                        className={`kanban-color-swatch ${
+                                          card.color === paletteColor.id
+                                            ? 'is-active'
+                                            : ''
+                                        }`}
+                                        data-post-it-color={paletteColor.id}
+                                        onClick={() =>
+                                          onChangeCardColor(
+                                            rowIndex,
+                                            columnId,
+                                            card.id,
+                                            paletteColor.id,
+                                          )
+                                        }
+                                        aria-label={`Cor ${paletteColor.label}`}
+                                        title={`Cor ${paletteColor.label}`}
+                                      />
+                                    ))}
+                                  </div>
+                                  <button
+                                    type='button'
+                                    className='btn btn-sm btn-outline-danger'
+                                    onClick={() =>
+                                      onDeleteCard(rowIndex, columnId, card.id)
+                                    }
+                                    aria-label='Remover cartão'
+                                  >
+                                    <i
+                                      className='bi bi-trash'
+                                      aria-hidden='true'
+                                    />
+                                  </button>
                                 </div>
-                                <button
-                                  type='button'
-                                  className='btn btn-sm btn-outline-secondary'
-                                  onClick={() =>
-                                    onStartEditingCard(
-                                      rowIndex,
-                                      columnId,
-                                      card.id,
-                                      card.content,
-                                    )
-                                  }
-                                  disabled={editingCurrentCard}
-                                >
-                                  <i
-                                    className='bi bi-pencil-square me-1'
-                                    aria-hidden='true'
-                                  />
-                                  Editar
-                                </button>
-                                <button
-                                  type='button'
-                                  className='btn btn-sm btn-outline-danger'
-                                  onClick={() =>
-                                    onDeleteCard(rowIndex, columnId, card.id)
-                                  }
-                                  aria-label='Remover cartão'
-                                >
-                                  <i
-                                    className='bi bi-trash'
-                                    aria-hidden='true'
-                                  />
-                                </button>
                               </div>
                             </article>
                           );
@@ -335,7 +337,7 @@ export function BoardTable({
                         ) && (
                           <button
                             type='button'
-                            className='btn btn-sm btn-outline-primary kanban-add-btn'
+                            className='btn btn-sm btn-primary kanban-add-btn'
                             onClick={() => onOpenComposer(rowIndex, columnId)}
                           >
                             <i
