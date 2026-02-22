@@ -436,7 +436,7 @@ function App() {
 
       <main className='container-fluid board-layout py-4 py-md-5'>
         <section className='board-panel'>
-          <div className='table-responsive board-table-wrapper'>
+          <div className='board-table-wrapper'>
             <table className='table table-bordered align-middle mb-0 board-table'>
               <colgroup>
                 <col style={{ width: '12%' }} />
@@ -446,9 +446,11 @@ function App() {
               </colgroup>
               <thead>
                 <tr>
-                  <th scope='col'>Camadas</th>
+                  <th className='sticky-top' scope='col'>
+                    Camadas
+                  </th>
                   {COLUMN_ORDER.map((columnId) => (
-                    <th scope='col' key={columnId}>
+                    <th className='sticky-top' scope='col' key={columnId}>
                       <div className='board-column-head'>
                         <span>{COLUMN_LABELS[columnId]}</span>
                         <span className='badge text-bg-secondary'>

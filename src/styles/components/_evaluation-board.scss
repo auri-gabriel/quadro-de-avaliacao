@@ -98,6 +98,10 @@
   table-layout: fixed;
 
   thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--bs-body-bg);
     font-weight: 600;
     vertical-align: middle;
     text-align: left;
@@ -396,6 +400,11 @@
 
   .board-help-text {
     font-size: 1.25rem;
+  }
+
+  .board-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .board-panel-footer {
