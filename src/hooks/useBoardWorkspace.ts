@@ -6,12 +6,24 @@ import {
   loadWorkspace,
   saveWorkspace,
 } from '../lib/boardStorage';
-import type { EvaluationProject, EvaluationWorkspace } from '../types/board';
+import type {
+  EvaluationProject,
+  EvaluationRow,
+  EvaluationWorkspace,
+} from '../types/board';
 
 export type ProjectField = 'name' | 'focalProblem' | 'author';
 export type UpdateActiveProject = (
   updater: (currentProject: EvaluationProject) => EvaluationProject,
 ) => void;
+
+export interface ImportedProjectInput {
+  name?: string;
+  focalProblem?: string;
+  author?: string;
+  version?: number;
+  rows: EvaluationRow[];
+}
 
 export function useBoardWorkspace() {
   const [workspace, setWorkspace] = useState<EvaluationWorkspace>(() =>
@@ -100,6 +112,29 @@ export function useBoardWorkspace() {
     }));
   };
 
+  const importProjectAsNew = (payload: ImportedProjectInput) => {
+    setWorkspace((currentWorkspace) => {
+      const nextProject = createProject(
+        payload.name?.trim() ||
+          `Projeto ${currentWorkspace.projects.length + 1}`,
+        {
+          focalProblem: payload.focalProblem ?? '',
+          author: payload.author ?? '',
+          version:
+            typeof payload.version === 'number' && payload.version > 0
+              ? Math.floor(payload.version)
+              : 1,
+          rows: payload.rows,
+        },
+      );
+
+      return {
+        activeProjectId: nextProject.id,
+        projects: [...currentWorkspace.projects, nextProject],
+      };
+    });
+  };
+
   const updateActiveProjectField = (field: ProjectField, value: string) => {
     updateActiveProject((currentProject) => ({
       ...currentProject,
@@ -116,5 +151,6 @@ export function useBoardWorkspace() {
     createNewProject,
     createNewVersion,
     updateActiveProjectField,
+    importProjectAsNew,
   };
 }

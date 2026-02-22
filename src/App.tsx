@@ -1,7 +1,9 @@
 import { type ChangeEvent, useRef } from 'react';
 import { AppTopbar } from './components/AppTopbar';
+import { AppDialogModal } from './components/AppDialogModal';
 import { BoardHeader } from './components/BoardHeader';
 import { BoardTable } from './components/BoardTable';
+import { useAppDialog } from './hooks/useAppDialog';
 import { parseBoardRows } from './lib/boardStorage';
 import { useBoardCards } from './hooks/useBoardCards';
 import { useBoardDnd } from './hooks/useBoardDnd';
@@ -78,6 +80,7 @@ function App() {
     createNewProject,
     createNewVersion,
     updateActiveProjectField,
+    importProjectAsNew,
   } = useBoardWorkspace();
   const {
     composer,
@@ -104,6 +107,8 @@ function App() {
     handleCellDragLeave,
   } = useBoardDnd({ updateActiveProject });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { modalState, openDialog, closeDialog, showInfoDialog } =
+    useAppDialog();
 
   const handleSelectProject = (event: ChangeEvent<HTMLSelectElement>) => {
     selectProject(event);
@@ -120,6 +125,32 @@ function App() {
   const handleCreateProjectVersion = () => {
     createNewVersion();
     clearCardUiState();
+    clearDragState();
+  };
+
+  const handleRequestResetBoard = async () => {
+    const resetChoice = await openDialog(
+      'Limpar quadro',
+      'Tem certeza que deseja limpar todo o quadro do projeto atual?',
+      [
+        {
+          value: 'confirm',
+          label: 'Limpar',
+          buttonClassName: 'btn-danger',
+        },
+        {
+          value: 'cancel',
+          label: 'Cancelar',
+          buttonClassName: 'btn-outline-secondary',
+        },
+      ],
+    );
+
+    if (resetChoice !== 'confirm') {
+      return;
+    }
+
+    handleResetBoard();
     clearDragState();
   };
 
@@ -180,9 +211,61 @@ function App() {
 
       const normalizedRows = parseBoardRows(candidateRows);
       if (!normalizedRows) {
-        window.alert(
+        await showInfoDialog(
+          'Importação inválida',
           'Arquivo inválido. Selecione um JSON exportado do quadro.',
         );
+        return;
+      }
+
+      const importChoice = await openDialog(
+        'Importar arquivo',
+        'Deseja importar como novo projeto ou sobrescrever o projeto atual?',
+        [
+          {
+            value: 'new-project',
+            label: 'Novo projeto',
+            buttonClassName: 'btn-primary',
+          },
+          {
+            value: 'overwrite',
+            label: 'Sobrescrever atual',
+            buttonClassName: 'btn-outline-danger',
+          },
+          {
+            value: 'cancel',
+            label: 'Cancelar',
+            buttonClassName: 'btn-outline-secondary',
+          },
+        ],
+      );
+
+      if (importChoice === 'cancel') {
+        return;
+      }
+
+      if (importChoice === 'new-project') {
+        importProjectAsNew({
+          name:
+            typeof importedProjectPayload?.projectName === 'string'
+              ? importedProjectPayload.projectName
+              : undefined,
+          focalProblem:
+            typeof importedProjectPayload?.focalProblem === 'string'
+              ? importedProjectPayload.focalProblem
+              : '',
+          author:
+            typeof importedProjectPayload?.author === 'string'
+              ? importedProjectPayload.author
+              : '',
+          version:
+            typeof importedProjectPayload?.projectVersion === 'number'
+              ? importedProjectPayload.projectVersion
+              : 1,
+          rows: normalizedRows,
+        });
+        clearCardUiState();
+        clearDragState();
         return;
       }
 
@@ -210,7 +293,8 @@ function App() {
       clearCardUiState();
       clearDragState();
     } catch {
-      window.alert(
+      await showInfoDialog(
+        'Falha ao abrir arquivo',
         'Não foi possível abrir este arquivo. Verifique o formato JSON.',
       );
     } finally {
@@ -270,7 +354,9 @@ function App() {
         onImportBoard={handleImportBoard}
         onOpenFilePicker={handleOpenFilePicker}
         onExportBoard={handleExportBoard}
-        onResetBoard={handleResetBoard}
+        onResetBoard={() => {
+          void handleRequestResetBoard();
+        }}
         onSelectProject={handleSelectProject}
         onCreateProject={handleCreateProject}
         onCreateProjectVersion={handleCreateProjectVersion}
@@ -311,6 +397,14 @@ function App() {
           </small>
         </footer>
       </main>
+
+      <AppDialogModal
+        isOpen={Boolean(modalState)}
+        title={modalState?.title ?? ''}
+        message={modalState?.message ?? ''}
+        options={modalState?.options ?? []}
+        onSelect={closeDialog}
+      />
     </div>
   );
 }
