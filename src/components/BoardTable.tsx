@@ -273,6 +273,10 @@ export function BoardTable({
                                   }
                                   disabled={editingCurrentCard}
                                 >
+                                  <i
+                                    className='bi bi-pencil-square me-1'
+                                    aria-hidden='true'
+                                  />
                                   Editar
                                 </button>
                                 <button
@@ -283,7 +287,10 @@ export function BoardTable({
                                   }
                                   aria-label='Remover cartão'
                                 >
-                                  ×
+                                  <i
+                                    className='bi bi-trash'
+                                    aria-hidden='true'
+                                  />
                                 </button>
                               </div>
                             </article>
@@ -331,7 +338,11 @@ export function BoardTable({
                             className='btn btn-sm btn-outline-primary kanban-add-btn'
                             onClick={() => onOpenComposer(rowIndex, columnId)}
                           >
-                            + Novo cartão
+                            <i
+                              className='bi bi-plus-circle me-1'
+                              aria-hidden='true'
+                            />
+                            Novo cartão
                           </button>
                         )}
                       </div>
@@ -346,6 +357,7 @@ export function BoardTable({
 
       <div className='board-panel-footer mt-3'>
         <small className='text-body-secondary'>
+          <i className='bi bi-arrows-move me-1' aria-hidden='true' />
           Dica: arraste e solte os cartões entre qualquer linha e coluna.
         </small>
       </div>

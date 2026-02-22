@@ -85,6 +85,7 @@ export function BoardHeader({
                   className='btn btn-outline-secondary'
                   onClick={onOpenFilePicker}
                 >
+                  <i className='bi bi-folder2-open me-1' aria-hidden='true' />
                   Abrir arquivo
                 </button>
                 <button
@@ -92,6 +93,7 @@ export function BoardHeader({
                   className='btn btn-outline-secondary'
                   onClick={onExportBoard}
                 >
+                  <i className='bi bi-download me-1' aria-hidden='true' />
                   Salvar arquivo
                 </button>
                 <button
@@ -99,6 +101,7 @@ export function BoardHeader({
                   className='btn btn-outline-secondary'
                   onClick={onResetBoard}
                 >
+                  <i className='bi bi-eraser me-1' aria-hidden='true' />
                   Limpar quadro
                 </button>
               </div>
@@ -126,6 +129,7 @@ export function BoardHeader({
                   className='btn btn-sm btn-outline-secondary'
                   onClick={onCreateProject}
                 >
+                  <i className='bi bi-plus-square me-1' aria-hidden='true' />
                   Novo projeto
                 </button>
                 <button
@@ -134,6 +138,7 @@ export function BoardHeader({
                   onClick={onCreateProjectVersion}
                   disabled={!activeProject}
                 >
+                  <i className='bi bi-copy me-1' aria-hidden='true' />
                   Nova versão
                 </button>
               </div>
