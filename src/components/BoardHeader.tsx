@@ -43,10 +43,10 @@ export function BoardHeader({
         <div className='board-header-grid'>
           <div className='d-flex flex-column gap-3'>
             <div>
-              <h1 className='mb-2 fw-semibold'>Análise: Quadro de Avaliação</h1>
+              <h1 className='mb-2 fw-semibold'>Quadro de Avaliação</h1>
               <p className='board-subtitle mb-0'>
-                Organize stakeholders, problemas e soluções com cartões no
-                estilo post-it.
+                Organize partes interessadas, problemas e soluções com cartões
+                no estilo post-it.
               </p>
             </div>
 
