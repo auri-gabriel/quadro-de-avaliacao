@@ -587,120 +587,158 @@ function App() {
       <section className='board-header'>
         <div className='container-fluid board-layout py-4 py-xl-5'>
           <div className='board-header-grid'>
-            <div>
-              <h1 className='mb-2 fw-semibold'>Análise: Quadro de Avaliação</h1>
-              <p className='board-subtitle mb-0'>
-                Organize stakeholders, problemas e soluções com cartões no
-                estilo post-it.
-              </p>
+            <div className='d-flex flex-column gap-3'>
+              <div>
+                <h1 className='mb-2 fw-semibold'>
+                  Análise: Quadro de Avaliação
+                </h1>
+                <p className='board-subtitle mb-0'>
+                  Organize stakeholders, problemas e soluções com cartões no
+                  estilo post-it.
+                </p>
+              </div>
 
-              <div className='project-manager mt-3'>
-                <div className='project-manager-row'>
-                  <label className='form-label mb-1' htmlFor='project-select'>
-                    Projeto
-                  </label>
-                  <div className='project-manager-actions'>
-                    <select
-                      id='project-select'
-                      className='form-select form-select-sm'
-                      value={activeProject?.id ?? ''}
-                      onChange={handleSelectProject}
-                    >
-                      {workspace.projects.map((project) => (
-                        <option key={project.id} value={project.id}>
-                          {project.name} • v{project.version}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type='button'
-                      className='btn btn-sm btn-outline-secondary'
-                      onClick={handleCreateProject}
-                    >
-                      Novo projeto
-                    </button>
-                    <button
-                      type='button'
-                      className='btn btn-sm btn-outline-secondary'
-                      onClick={handleCreateProjectVersion}
-                      disabled={!activeProject}
-                    >
-                      Nova versão
-                    </button>
-                  </div>
-                </div>
-
-                <div className='project-manager-grid'>
-                  <div>
-                    <label className='form-label mb-1' htmlFor='project-name'>
-                      Nome
-                    </label>
-                    <input
-                      id='project-name'
-                      className='form-control form-control-sm'
-                      value={activeProject?.name ?? ''}
-                      onChange={(event) =>
-                        handleUpdateActiveProjectField(
-                          'name',
-                          event.target.value,
-                        )
-                      }
-                      placeholder='Nome do projeto'
-                    />
-                  </div>
-                  <div>
-                    <label className='form-label mb-1' htmlFor='project-author'>
-                      Autoria
-                    </label>
-                    <input
-                      id='project-author'
-                      className='form-control form-control-sm'
-                      value={activeProject?.author ?? ''}
-                      onChange={(event) =>
-                        handleUpdateActiveProjectField(
-                          'author',
-                          event.target.value,
-                        )
-                      }
-                      placeholder='Nome do autor'
-                    />
-                  </div>
-                  <div className='project-manager-focal'>
-                    <label className='form-label mb-1' htmlFor='project-focal'>
-                      Problema Focal
-                    </label>
-                    <input
-                      id='project-focal'
-                      className='form-control form-control-sm'
-                      value={activeProject?.focalProblem ?? ''}
-                      onChange={(event) =>
-                        handleUpdateActiveProjectField(
-                          'focalProblem',
-                          event.target.value,
-                        )
-                      }
-                      placeholder='Descreva o problema focal'
-                    />
-                  </div>
-                </div>
+              <div className='board-kpis'>
+                <article className='kpi-card'>
+                  <span className='kpi-label'>Cartões</span>
+                  <strong className='kpi-value'>{totalCards}</strong>
+                </article>
+                <article className='kpi-card'>
+                  <span className='kpi-label'>Camadas ativas</span>
+                  <strong className='kpi-value'>{activeLayers}/3</strong>
+                </article>
+                <article className='kpi-card'>
+                  <span className='kpi-label'>Partes interessadas</span>
+                  <strong className='kpi-value'>
+                    {getColumnCardCount('stakeholders')}
+                  </strong>
+                </article>
               </div>
             </div>
 
-            <div className='board-kpis'>
-              <article className='kpi-card'>
-                <span className='kpi-label'>Cartões</span>
-                <strong className='kpi-value'>{totalCards}</strong>
-              </article>
-              <article className='kpi-card'>
-                <span className='kpi-label'>Camadas ativas</span>
-                <strong className='kpi-value'>{activeLayers}/3</strong>
-              </article>
-              <article className='kpi-card'>
-                <span className='kpi-label'>Partes interessadas</span>
-                <strong className='kpi-value'>
-                  {getColumnCardCount('stakeholders')}
-                </strong>
-              </article>
+            <div className='project-manager mt-0'>
+              <div className='d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-2'>
+                <h2 className='h6 mb-0 fw-semibold text-uppercase'>
+                  Gestão do projeto
+                </h2>
+
+                <div className='board-file-actions'>
+                  <input
+                    ref={fileInputRef}
+                    type='file'
+                    accept='.json,application/json'
+                    className='d-none'
+                    onChange={handleImportBoard}
+                  />
+                  <button
+                    type='button'
+                    className='btn btn-outline-secondary'
+                    onClick={handleOpenFilePicker}
+                  >
+                    Abrir arquivo
+                  </button>
+                  <button
+                    type='button'
+                    className='btn btn-outline-secondary'
+                    onClick={handleExportBoard}
+                  >
+                    Salvar arquivo
+                  </button>
+                  <button
+                    type='button'
+                    className='btn btn-outline-secondary'
+                    onClick={handleResetBoard}
+                  >
+                    Limpar quadro
+                  </button>
+                </div>
+              </div>
+
+              <div className='project-manager-row mt-2'>
+                <label className='form-label mb-1' htmlFor='project-select'>
+                  Projeto
+                </label>
+                <div className='project-manager-actions'>
+                  <select
+                    id='project-select'
+                    className='form-select form-select-sm'
+                    value={activeProject?.id ?? ''}
+                    onChange={handleSelectProject}
+                  >
+                    {workspace.projects.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.name} • v{project.version}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type='button'
+                    className='btn btn-sm btn-outline-secondary'
+                    onClick={handleCreateProject}
+                  >
+                    Novo projeto
+                  </button>
+                  <button
+                    type='button'
+                    className='btn btn-sm btn-outline-secondary'
+                    onClick={handleCreateProjectVersion}
+                    disabled={!activeProject}
+                  >
+                    Nova versão
+                  </button>
+                </div>
+              </div>
+
+              <div className='project-manager-grid'>
+                <div>
+                  <label className='form-label mb-1' htmlFor='project-name'>
+                    Nome
+                  </label>
+                  <input
+                    id='project-name'
+                    className='form-control form-control-sm'
+                    value={activeProject?.name ?? ''}
+                    onChange={(event) =>
+                      handleUpdateActiveProjectField('name', event.target.value)
+                    }
+                    placeholder='Nome do projeto'
+                  />
+                </div>
+                <div>
+                  <label className='form-label mb-1' htmlFor='project-author'>
+                    Autoria
+                  </label>
+                  <input
+                    id='project-author'
+                    className='form-control form-control-sm'
+                    value={activeProject?.author ?? ''}
+                    onChange={(event) =>
+                      handleUpdateActiveProjectField(
+                        'author',
+                        event.target.value,
+                      )
+                    }
+                    placeholder='Nome do autor'
+                  />
+                </div>
+                <div className='project-manager-focal'>
+                  <label className='form-label mb-1' htmlFor='project-focal'>
+                    Problema Focal
+                  </label>
+                  <input
+                    id='project-focal'
+                    className='form-control form-control-sm'
+                    value={activeProject?.focalProblem ?? ''}
+                    onChange={(event) =>
+                      handleUpdateActiveProjectField(
+                        'focalProblem',
+                        event.target.value,
+                      )
+                    }
+                    placeholder='Descreva o problema focal'
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -965,36 +1003,6 @@ function App() {
             <small className='text-body-secondary'>
               Dica: arraste e solte os cartões entre qualquer linha e coluna.
             </small>
-            <div className='board-file-actions'>
-              <input
-                ref={fileInputRef}
-                type='file'
-                accept='.json,application/json'
-                className='d-none'
-                onChange={handleImportBoard}
-              />
-              <button
-                type='button'
-                className='btn btn-outline-secondary'
-                onClick={handleOpenFilePicker}
-              >
-                Abrir arquivo
-              </button>
-              <button
-                type='button'
-                className='btn btn-outline-secondary'
-                onClick={handleExportBoard}
-              >
-                Salvar arquivo
-              </button>
-              <button
-                type='button'
-                className='btn btn-outline-secondary'
-                onClick={handleResetBoard}
-              >
-                Limpar quadro
-              </button>
-            </div>
           </div>
         </section>
 
