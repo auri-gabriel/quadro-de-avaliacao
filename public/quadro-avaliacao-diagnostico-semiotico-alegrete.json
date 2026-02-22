@@ -1,0 +1,172 @@
+{
+  "app": "quadro-de-avaliacao",
+  "version": 1,
+  "exportedAt": "2026-02-21T21:00:00.000Z",
+  "rows": [
+    {
+      "layerId": "informal",
+      "layerLabel": "Informal",
+      "stakeholders": [
+        {
+          "id": "inf-stk-1",
+          "content": "<p><strong>Beneficiários ativos e rede comunitária</strong></p><p>CMAS, COMDICA, Conselho da Pessoa Idosa, CRAM, CREAS e demais atores que influenciam ou sofrem impacto das ações do CCFV.</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "inf-stk-2",
+          "content": "<p><strong>Beneficiários indiretos</strong></p><p>Setores públicos, governo estadual/federal e instituições de ensino que se beneficiam indiretamente do funcionamento do CCFV.</p>",
+          "color": "green"
+        },
+        {
+          "id": "inf-stk-3",
+          "content": "<p><strong>Profissionais parceiros do território</strong></p><p>Profissionais do CRAS e outros convidados que colaboram com palestras e ações formativas no centro.</p>",
+          "color": "blue"
+        }
+      ],
+      "issues": [
+        {
+          "id": "inf-iss-1",
+          "content": "<p><strong>Baixa visibilidade social do papel do SCFV</strong></p><p>Famílias e parte da comunidade podem não compreender plenamente a relevância do CCFV para proteção social e convivência.</p>",
+          "color": "orange"
+        },
+        {
+          "id": "inf-iss-2",
+          "content": "<p><strong>Articulação territorial irregular</strong></p><p>Conexões entre rede local, serviços e ações extensionistas ocorrem sem rotina suficientemente sistematizada.</p>",
+          "color": "pink"
+        },
+        {
+          "id": "inf-iss-3",
+          "content": "<p><strong>Potencial subutilizado de extensão</strong></p><p>Apesar do alinhamento com o UNIPAMPA CIDADÃ, ainda há espaço para ampliar presença contínua de projetos no CCFV.</p>",
+          "color": "purple"
+        }
+      ],
+      "ideas": [
+        {
+          "id": "inf-ide-1",
+          "content": "<p><strong>Agenda permanente de articulação da rede</strong></p><ul><li>Encontros periódicos com conselhos e serviços</li><li>Definição de responsabilidades compartilhadas</li></ul>",
+          "color": "yellow"
+        },
+        {
+          "id": "inf-ide-2",
+          "content": "<p><strong>Comunicação pública de impacto</strong></p><p>Divulgar resultados e histórias do CCFV para ampliar reconhecimento comunitário e adesão de famílias.</p>",
+          "color": "green"
+        },
+        {
+          "id": "inf-ide-3",
+          "content": "<p><strong>Sistematizar UNIPAMPA CIDADÃ no território</strong></p><p>Formalizar ciclos de extensão e integração com demandas do CCFV ao longo do ano.</p>",
+          "color": "blue"
+        }
+      ]
+    },
+    {
+      "layerId": "formal",
+      "layerLabel": "Formal",
+      "stakeholders": [
+        {
+          "id": "for-stk-1",
+          "content": "<p><strong>Usuários dos serviços do CCFV</strong></p><p>População em geral de Alegrete, com foco em grupos como Vida Ativa (60+) e Pró-Jovem (5 a 17 anos).</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "for-stk-2",
+          "content": "<p><strong>Poder público e proteção social</strong></p><p>PMA, SPDS e CRAS como atores centrais de gestão, encaminhamento e monitoramento de atendimento.</p>",
+          "color": "pink"
+        },
+        {
+          "id": "for-stk-3",
+          "content": "<p><strong>Parceiros institucionais e doadores</strong></p><p>UNIPAMPA, Uniasselvi, Escola Lauro Dornelles, SESC e apoio de instituições militares e voluntariado privado.</p>",
+          "color": "orange"
+        }
+      ],
+      "issues": [
+        {
+          "id": "for-iss-1",
+          "content": "<p><strong>Baixa assiduidade de crianças e adolescentes</strong></p><p>Fatores como turno escolar, distância, custo de transporte e desconhecimento familiar reduzem frequência.</p>",
+          "color": "blue"
+        },
+        {
+          "id": "for-iss-2",
+          "content": "<p><strong>Fragilidade de normativas e governança</strong></p><p>Necessidade de regimento/instrução normativa local e clareza sobre relatórios e setores demandantes.</p>",
+          "color": "purple"
+        },
+        {
+          "id": "for-iss-3",
+          "content": "<p><strong>Metas e programação pouco ancoradas em capacidade real</strong></p><p>Planejamento pode ficar desalinhado da infraestrutura e recursos humanos efetivamente disponíveis.</p>",
+          "color": "green"
+        }
+      ],
+      "ideas": [
+        {
+          "id": "for-ide-1",
+          "content": "<p><strong>Programação artístico-cultural com busca ativa</strong></p><ul><li>Planejar calendário atrativo para crianças e jovens</li><li>Divulgar em escolas e famílias</li></ul>",
+          "color": "yellow"
+        },
+        {
+          "id": "for-ide-2",
+          "content": "<p><strong>Plano de metas realista e compromisso intersetorial</strong></p><p>Restabelecer compromisso público da Prefeitura e SPDS com metas compatíveis à capacidade operacional do CCFV.</p>",
+          "color": "blue"
+        },
+        {
+          "id": "for-ide-3",
+          "content": "<p><strong>Trilhas para cidadania e trabalho</strong></p><p>Ofertar oficinas de ferramentas digitais, currículo, programação introdutória e uso ético de IA generativa.</p>",
+          "color": "green"
+        }
+      ]
+    },
+    {
+      "layerId": "technical",
+      "layerLabel": "Tecnico",
+      "stakeholders": [
+        {
+          "id": "tec-stk-1",
+          "content": "<p><strong>SPDS e manutenção institucional</strong></p><p>Secretaria responsável por sustentar infraestrutura humana e material necessária ao funcionamento do CCFV.</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "tec-stk-2",
+          "content": "<p><strong>Equipe interna e apoio operacional</strong></p><p>Coordenação, equipe, atendente, agente administrativo, estagiários e prestador de serviço em reabilitação social.</p>",
+          "color": "blue"
+        },
+        {
+          "id": "tec-stk-3",
+          "content": "<p><strong>Parceiros técnicos e serviços terceirizados</strong></p><p>UNIPAMPA, Uniasselvi, escola parceira e SESC Vida Ativa, além de serviços de manutenção da infraestrutura.</p>",
+          "color": "purple"
+        }
+      ],
+      "issues": [
+        {
+          "id": "tec-iss-1",
+          "content": "<p><strong>Déficit de equipe interdisciplinar e supervisão</strong></p><p>Ausência de profissionais como assistente social, psicólogo, pedagogo e orientador social; lacunas em dias de baile.</p>",
+          "color": "orange"
+        },
+        {
+          "id": "tec-iss-2",
+          "content": "<p><strong>Infraestrutura tecnológica e de rede insuficiente</strong></p><p>Laboratório desatualizado, internet administrativa apenas por wi-fi e equipamentos em desuso.</p>",
+          "color": "pink"
+        },
+        {
+          "id": "tec-iss-3",
+          "content": "<p><strong>Baixa informatização de processos</strong></p><p>Registros diários predominantemente em papel e necessidade de melhoria em práticas digitais da equipe.</p>",
+          "color": "green"
+        }
+      ],
+      "ideas": [
+        {
+          "id": "tec-ide-1",
+          "content": "<p><strong>Reforço técnico de pessoal qualificado</strong></p><p>Ampliar equipe com servidor de 30h a 40h com formação em pedagogia, artes e/ou serviço social.</p>",
+          "color": "yellow"
+        },
+        {
+          "id": "tec-ide-2",
+          "content": "<p><strong>Modernização de infraestrutura e equipamentos</strong></p><ul><li>Atualizar laboratório e rede administrativa</li><li>Reativar equipamentos recebidos e adquirir caixa de som adequada</li></ul>",
+          "color": "blue"
+        },
+        {
+          "id": "tec-ide-3",
+          "content": "<p><strong>Informatização e formação continuada</strong></p><p>Digitalizar registros, mapear parque computacional e realizar treinamento técnico de informática para equipe administrativa.</p>",
+          "color": "purple"
+        }
+      ]
+    }
+  ]
+}
