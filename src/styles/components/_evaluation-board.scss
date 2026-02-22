@@ -382,6 +382,7 @@
 }
 
 .kanban-card {
+  position: relative;
   min-width: 0;
   max-width: 100%;
   border: 1px solid var(--bs-border-color);
@@ -429,6 +430,27 @@
 
   &:focus-within {
     box-shadow: 0 4px 10px rgba(9, 30, 66, 0.24);
+  }
+
+  &[data-drop-indicator='true'][data-drop-placement='before']::before,
+  &[data-drop-indicator='true'][data-drop-placement='after']::after {
+    content: '';
+    position: absolute;
+    left: 0.4rem;
+    right: 0.4rem;
+    height: 0;
+    border-top: 3px solid color-mix(in srgb, var(--bs-primary) 78%, white 22%);
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  &[data-drop-indicator='true'][data-drop-placement='before']::before {
+    top: -0.45rem;
+  }
+
+  &[data-drop-indicator='true'][data-drop-placement='after']::after {
+    bottom: -0.45rem;
   }
 }
 

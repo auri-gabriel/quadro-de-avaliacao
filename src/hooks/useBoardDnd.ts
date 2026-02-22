@@ -13,6 +13,15 @@ interface DragOverTarget {
   columnId: ColumnId;
 }
 
+export type DropPlacement = 'before' | 'after';
+
+export interface DropIndicatorTarget {
+  rowIndex: number;
+  columnId: ColumnId;
+  cardId: string;
+  placement: DropPlacement;
+}
+
 interface UseBoardDndParams {
   updateActiveProject: UpdateActiveProject;
 }
@@ -22,50 +31,87 @@ function moveCardToTarget(
   payload: DragCardPayload,
   toRowIndex: number,
   toColumnId: ColumnId,
+  targetCardId?: string,
+  placement: DropPlacement = 'before',
 ): EvaluationRow[] {
-  const sourceRow = currentRows[payload.fromRowIndex];
+  const nextRows = currentRows.map((row) => ({
+    ...row,
+    stakeholders: [...row.stakeholders],
+    issues: [...row.issues],
+    ideas: [...row.ideas],
+  }));
+
+  const sourceRow = nextRows[payload.fromRowIndex];
   if (!sourceRow) {
     return currentRows;
   }
 
-  const cardToMove = sourceRow[payload.fromColumnId].find(
+  const targetRow = nextRows[toRowIndex];
+  if (!targetRow) {
+    return currentRows;
+  }
+
+  const sourceCards = sourceRow[payload.fromColumnId];
+  const sourceIndex = sourceCards.findIndex(
     (card) => card.id === payload.cardId,
   );
+  if (sourceIndex < 0) {
+    return currentRows;
+  }
+
+  const [cardToMove] = sourceCards.splice(sourceIndex, 1);
   if (!cardToMove) {
     return currentRows;
   }
 
-  if (
-    payload.fromRowIndex === toRowIndex &&
-    payload.fromColumnId === toColumnId
-  ) {
-    return currentRows;
+  const targetCards = targetRow[toColumnId];
+  let insertionIndex = targetCards.length;
+
+  if (targetCardId) {
+    const targetIndex = targetCards.findIndex(
+      (card) => card.id === targetCardId,
+    );
+    if (targetIndex >= 0) {
+      insertionIndex = placement === 'after' ? targetIndex + 1 : targetIndex;
+    }
   }
 
-  return currentRows.map((row, rowIndex) => {
-    const nextRow = { ...row };
+  if (
+    payload.fromRowIndex === toRowIndex &&
+    payload.fromColumnId === toColumnId &&
+    sourceIndex < insertionIndex
+  ) {
+    insertionIndex -= 1;
+  }
 
-    if (rowIndex === payload.fromRowIndex) {
-      nextRow[payload.fromColumnId] = row[payload.fromColumnId].filter(
-        (card) => card.id !== payload.cardId,
-      );
-    }
+  const clampedIndex = Math.max(
+    0,
+    Math.min(insertionIndex, targetCards.length),
+  );
+  targetCards.splice(clampedIndex, 0, cardToMove);
 
-    if (rowIndex === toRowIndex) {
-      nextRow[toColumnId] = [...nextRow[toColumnId], cardToMove];
-    }
+  return nextRows;
+}
 
-    return nextRow;
-  });
+function resolveCardDropPlacement(
+  event: DragEvent<HTMLElement>,
+): DropPlacement {
+  const cardBounds = event.currentTarget.getBoundingClientRect();
+  const cardMidY = cardBounds.top + cardBounds.height / 2;
+
+  return event.clientY >= cardMidY ? 'after' : 'before';
 }
 
 export function useBoardDnd({ updateActiveProject }: UseBoardDndParams) {
   const [dragOverTarget, setDragOverTarget] = useState<DragOverTarget | null>(
     null,
   );
+  const [dropIndicatorTarget, setDropIndicatorTarget] =
+    useState<DropIndicatorTarget | null>(null);
 
   const clearDragState = () => {
     setDragOverTarget(null);
+    setDropIndicatorTarget(null);
   };
 
   const handleCardDragStart = (
@@ -86,6 +132,7 @@ export function useBoardDnd({ updateActiveProject }: UseBoardDndParams) {
 
   const handleCardDragEnd = () => {
     setDragOverTarget(null);
+    setDropIndicatorTarget(null);
   };
 
   const handleCellDragOver = (
@@ -102,6 +149,10 @@ export function useBoardDnd({ updateActiveProject }: UseBoardDndParams) {
       dragOverTarget.columnId !== columnId
     ) {
       setDragOverTarget({ rowIndex, columnId });
+    }
+
+    if (dropIndicatorTarget) {
+      setDropIndicatorTarget(null);
     }
   };
 
@@ -132,6 +183,7 @@ export function useBoardDnd({ updateActiveProject }: UseBoardDndParams) {
       // Ignore malformed drag payloads
     } finally {
       setDragOverTarget(null);
+      setDropIndicatorTarget(null);
     }
   };
 
@@ -149,16 +201,123 @@ export function useBoardDnd({ updateActiveProject }: UseBoardDndParams) {
       ) {
         setDragOverTarget(null);
       }
+
+      if (dropIndicatorTarget) {
+        setDropIndicatorTarget(null);
+      }
+    }
+  };
+
+  const handleCardDragOver = (
+    event: DragEvent<HTMLElement>,
+    rowIndex: number,
+    columnId: ColumnId,
+    targetCardId: string,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = 'move';
+
+    if (
+      !dragOverTarget ||
+      dragOverTarget.rowIndex !== rowIndex ||
+      dragOverTarget.columnId !== columnId
+    ) {
+      setDragOverTarget({ rowIndex, columnId });
+    }
+
+    const placement = resolveCardDropPlacement(event);
+    setDropIndicatorTarget((currentTarget) => {
+      if (
+        currentTarget?.rowIndex === rowIndex &&
+        currentTarget.columnId === columnId &&
+        currentTarget.cardId === targetCardId &&
+        currentTarget.placement === placement
+      ) {
+        return currentTarget;
+      }
+
+      return {
+        rowIndex,
+        columnId,
+        cardId: targetCardId,
+        placement,
+      };
+    });
+  };
+
+  const handleCardDrop = (
+    event: DragEvent<HTMLElement>,
+    toRowIndex: number,
+    toColumnId: ColumnId,
+    targetCardId: string,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    try {
+      const raw = event.dataTransfer.getData('application/json');
+      if (!raw) {
+        return;
+      }
+
+      const payload = JSON.parse(raw) as DragCardPayload;
+      const placement = resolveCardDropPlacement(event);
+      updateActiveProject((currentProject) => ({
+        ...currentProject,
+        rows: moveCardToTarget(
+          currentProject.rows,
+          payload,
+          toRowIndex,
+          toColumnId,
+          targetCardId,
+          placement,
+        ),
+      }));
+    } catch {
+      // Ignore malformed drag payloads
+    } finally {
+      setDragOverTarget(null);
+      setDropIndicatorTarget(null);
+    }
+  };
+
+  const handleCardDragLeave = (
+    event: DragEvent<HTMLElement>,
+    rowIndex: number,
+    columnId: ColumnId,
+  ) => {
+    const nextTarget = event.relatedTarget as Node | null;
+    if (!nextTarget || !event.currentTarget.contains(nextTarget)) {
+      if (
+        dragOverTarget &&
+        dragOverTarget.rowIndex === rowIndex &&
+        dragOverTarget.columnId === columnId
+      ) {
+        setDragOverTarget(null);
+      }
+
+      if (
+        dropIndicatorTarget &&
+        dropIndicatorTarget.rowIndex === rowIndex &&
+        dropIndicatorTarget.columnId === columnId
+      ) {
+        setDropIndicatorTarget(null);
+      }
     }
   };
 
   return {
     dragOverTarget,
+    dropIndicatorTarget,
     clearDragState,
     handleCardDragStart,
     handleCardDragEnd,
     handleCellDragOver,
     handleCellDrop,
     handleCellDragLeave,
+    handleCardDragOver,
+    handleCardDrop,
+    handleCardDragLeave,
   };
 }

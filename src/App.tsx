@@ -145,9 +145,13 @@ function App() {
   } = useBoardCards({ updateActiveProject: updateActiveProjectWithHistory });
   const {
     dragOverTarget,
+    dropIndicatorTarget,
     clearDragState,
     handleCardDragStart,
     handleCardDragEnd,
+    handleCardDragOver,
+    handleCardDrop,
+    handleCardDragLeave,
     handleCellDragOver,
     handleCellDrop,
     handleCellDragLeave,
@@ -682,6 +686,7 @@ function App() {
           composer={composer}
           editingCard={editingCard}
           dragOverTarget={dragOverTarget}
+          dropIndicatorTarget={dropIndicatorTarget}
           getColumnCardCount={getColumnCardCount}
           hasMeaningfulContent={hasMeaningfulContent}
           onCellDragOver={handleCellDragOver}
@@ -689,6 +694,9 @@ function App() {
           onCellDragLeave={handleCellDragLeave}
           onCardDragStart={handleCardDragStart}
           onCardDragEnd={handleCardDragEnd}
+          onCardDragOver={handleCardDragOver}
+          onCardDrop={handleCardDrop}
+          onCardDragLeave={handleCardDragLeave}
           onCardValueChange={handleEditingCardValueChange}
           onSaveEditedCard={handleSaveEditedCard}
           onCancelEditingCard={() => setEditingCard(null)}

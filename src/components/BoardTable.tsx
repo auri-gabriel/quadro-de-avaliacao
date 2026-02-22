@@ -6,6 +6,7 @@ import type {
   PostItColor,
 } from '../types/board';
 import type { ComposerState, EditingCardState } from '../hooks/useBoardCards';
+import type { DropIndicatorTarget } from '../hooks/useBoardDnd';
 
 interface DragOverTarget {
   rowIndex: number;
@@ -25,6 +26,7 @@ interface BoardTableProps {
   composer: ComposerState | null;
   editingCard: EditingCardState | null;
   dragOverTarget: DragOverTarget | null;
+  dropIndicatorTarget: DropIndicatorTarget | null;
   getColumnCardCount: (columnId: ColumnId) => number;
   hasMeaningfulContent: (value: string) => boolean;
   onCellDragOver: (
@@ -49,6 +51,23 @@ interface BoardTableProps {
     cardId: string,
   ) => void;
   onCardDragEnd: () => void;
+  onCardDragOver: (
+    event: React.DragEvent<HTMLElement>,
+    rowIndex: number,
+    columnId: ColumnId,
+    targetCardId: string,
+  ) => void;
+  onCardDrop: (
+    event: React.DragEvent<HTMLElement>,
+    rowIndex: number,
+    columnId: ColumnId,
+    targetCardId: string,
+  ) => void;
+  onCardDragLeave: (
+    event: React.DragEvent<HTMLElement>,
+    rowIndex: number,
+    columnId: ColumnId,
+  ) => void;
   onCardValueChange: (nextValue: string) => void;
   onSaveEditedCard: () => void;
   onCancelEditingCard: () => void;
@@ -92,6 +111,7 @@ export function BoardTable({
   composer,
   editingCard,
   dragOverTarget,
+  dropIndicatorTarget,
   getColumnCardCount,
   hasMeaningfulContent,
   onCellDragOver,
@@ -99,6 +119,9 @@ export function BoardTable({
   onCellDragLeave,
   onCardDragStart,
   onCardDragEnd,
+  onCardDragOver,
+  onCardDrop,
+  onCardDragLeave,
   onCardValueChange,
   onSaveEditedCard,
   onCancelEditingCard,
@@ -177,12 +200,25 @@ export function BoardTable({
                             columnId,
                           );
                           const editingValue = editingCard?.value ?? '';
+                          const isDropIndicatorTarget =
+                            dropIndicatorTarget?.rowIndex === rowIndex &&
+                            dropIndicatorTarget.columnId === columnId &&
+                            dropIndicatorTarget.cardId === card.id;
 
                           return (
                             <article
                               className='kanban-card'
                               key={card.id}
+                              data-card-id={card.id}
                               data-post-it-color={card.color}
+                              data-drop-indicator={
+                                isDropIndicatorTarget ? 'true' : 'false'
+                              }
+                              data-drop-placement={
+                                isDropIndicatorTarget
+                                  ? dropIndicatorTarget?.placement
+                                  : undefined
+                              }
                               draggable={!editingCurrentCard}
                               onDragStart={(event) =>
                                 onCardDragStart(
@@ -193,6 +229,20 @@ export function BoardTable({
                                 )
                               }
                               onDragEnd={onCardDragEnd}
+                              onDragOver={(event) =>
+                                onCardDragOver(
+                                  event,
+                                  rowIndex,
+                                  columnId,
+                                  card.id,
+                                )
+                              }
+                              onDrop={(event) =>
+                                onCardDrop(event, rowIndex, columnId, card.id)
+                              }
+                              onDragLeave={(event) =>
+                                onCardDragLeave(event, rowIndex, columnId)
+                              }
                             >
                               {editingCurrentCard ? (
                                 <div className='kanban-card-editor'>
