@@ -304,6 +304,35 @@ function App() {
     clearDragState();
   };
 
+  const handleRequestDeleteCard = async (
+    rowIndex: number,
+    columnId: ColumnId,
+    cardId: string,
+  ) => {
+    const deleteChoice = await openDialog(
+      'Excluir cartão',
+      'Tem certeza que deseja excluir este cartão? Esta ação não pode ser desfeita.',
+      [
+        {
+          value: 'confirm',
+          label: 'Excluir',
+          buttonClassName: 'btn-danger',
+        },
+        {
+          value: 'cancel',
+          label: 'Cancelar',
+          buttonClassName: 'btn-outline-secondary',
+        },
+      ],
+    );
+
+    if (deleteChoice !== 'confirm') {
+      return;
+    }
+
+    handleDeleteCard(rowIndex, columnId, cardId);
+  };
+
   const handleExportBoard = async () => {
     if (!activeProject) {
       return;
@@ -568,7 +597,9 @@ function App() {
           onCancelEditingCard={() => setEditingCard(null)}
           onChangeCardColor={handleChangeCardColor}
           onStartEditingCard={handleStartEditingCard}
-          onDeleteCard={handleDeleteCard}
+          onDeleteCard={(rowIndex, columnId, cardId) => {
+            void handleRequestDeleteCard(rowIndex, columnId, cardId);
+          }}
           onComposerValueChange={handleComposerValueChange}
           onSaveCard={handleSaveCard}
           onCancelComposer={() => setComposer(null)}
