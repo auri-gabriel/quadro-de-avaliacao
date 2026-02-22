@@ -1,7 +1,12 @@
 {
   "app": "quadro-de-avaliacao",
-  "version": 1,
+  "schemaVersion": 2,
   "exportedAt": "2026-02-21T21:00:00.000Z",
+  "projectId": "diagnostico-semiotico-alegrete-v001",
+  "projectName": "Diagnóstico Semiótico — Alegrete",
+  "focalProblem": "Desalinhamento entre demanda social, capacidade operacional e governança do CCFV em Alegrete.",
+  "author": "Equipe Técnica do CCFV",
+  "projectVersion": 1,
   "rows": [
     {
       "layerId": "informal",

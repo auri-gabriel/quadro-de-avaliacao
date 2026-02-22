@@ -1,7 +1,12 @@
 {
   "app": "quadro-de-avaliacao",
-  "version": 1,
+  "schemaVersion": 2,
   "exportedAt": "2026-02-21T20:30:00.000Z",
+  "projectId": "exemplo-completo-v001",
+  "projectName": "Exemplo Completo",
+  "focalProblem": "Baixa adesão e pouca integração de dados no atendimento socioassistencial.",
+  "author": "Equipe de Avaliação",
+  "projectVersion": 1,
   "rows": [
     {
       "layerId": "informal",
