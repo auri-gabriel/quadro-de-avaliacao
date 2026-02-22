@@ -147,7 +147,10 @@ export function BoardTable({
                   const cards = row[columnId];
 
                   return (
-                    <td key={`${row.layerId}-${columnId}`}>
+                    <td
+                      key={`${row.layerId}-${columnId}`}
+                      data-layer-label={row.layerLabel}
+                    >
                       <div
                         className='kanban-cell'
                         onDragOver={(event) =>
