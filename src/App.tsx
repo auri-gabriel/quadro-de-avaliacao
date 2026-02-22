@@ -712,8 +712,15 @@ function App() {
         />
 
         <footer className='app-footer'>
-          <small className='text-body-secondary'>
-            Quadro digital • MVP Kanban para análise colaborativa
+          <div className='app-footer-meta'>
+            <span className='app-footer-kicker'>Quadro digital</span>
+            <strong className='app-footer-title'>
+              {activeProject?.name ?? 'Projeto sem nome'}
+            </strong>
+          </div>
+          <small className='app-footer-note text-body-secondary'>
+            Quadro MVP para análise colaborativa • v
+            {activeProject?.version ?? 1}
           </small>
         </footer>
       </main>

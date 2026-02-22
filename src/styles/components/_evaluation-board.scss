@@ -618,9 +618,37 @@
 }
 
 .app-footer {
-  margin-top: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid
+    color-mix(in srgb, var(--bs-border-color) 84%, transparent 16%);
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.app-footer-meta {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.app-footer-kicker {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bs-secondary-color);
+}
+
+.app-footer-title {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--bs-dark) 78%, transparent 22%);
+}
+
+.app-footer-note {
+  font-size: 0.82rem;
 }
 
 .board-help-text {
@@ -704,6 +732,11 @@
   }
 
   .board-panel-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-footer {
     flex-direction: column;
     align-items: flex-start;
   }
