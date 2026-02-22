@@ -235,11 +235,12 @@ export function BoardHeader({
                 <label className='form-label mb-1' htmlFor='project-focal'>
                   Problema Focal
                 </label>
-                <input
+                <textarea
                   id='project-focal'
                   className='form-control form-control-sm'
                   value={projectDraft.focalProblem}
                   disabled={!activeProject}
+                  rows={3}
                   onChange={(event) =>
                     onChangeProjectDraftField(
                       'focalProblem',
