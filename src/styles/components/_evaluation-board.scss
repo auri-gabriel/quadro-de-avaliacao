@@ -55,6 +55,37 @@
   color: color-mix(in srgb, var(--bs-dark) 72%, transparent 28%);
 }
 
+.project-manager {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--bs-dark) 18%, transparent 82%);
+  background: color-mix(in srgb, white 65%, transparent 35%);
+}
+
+.project-manager-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.project-manager-actions {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.project-manager-grid {
+  margin-top: 0.65rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 0.65rem;
+}
+
+.project-manager-focal {
+  grid-column: 1 / -1;
+}
+
 .board-kpis {
   display: grid;
   grid-template-columns: repeat(3, minmax(130px, 1fr));
@@ -388,6 +419,14 @@
     width: 100%;
     min-width: 0;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .project-manager-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .project-manager-grid {
+    grid-template-columns: 1fr;
   }
 
   .board-group-cell {

@@ -24,6 +24,22 @@ export interface EvaluationRow {
   ideas: BoardCard[];
 }
 
+export interface EvaluationProject {
+  id: string;
+  name: string;
+  focalProblem: string;
+  author: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  rows: EvaluationRow[];
+}
+
+export interface EvaluationWorkspace {
+  activeProjectId: string;
+  projects: EvaluationProject[];
+}
+
 export const INITIAL_EVALUATION_ROWS: EvaluationRow[] = [
   {
     layerId: 'informal',

@@ -2,19 +2,24 @@ import {
   type ChangeEvent,
   type DragEvent,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import { RichTextCell } from './components/RichTextCell';
 import {
   createInitialBoard,
-  loadBoard,
+  createProject,
+  duplicateProjectVersion,
+  loadWorkspace,
   parseBoardRows,
-  saveBoard,
+  saveWorkspace,
 } from './lib/boardStorage';
 import {
   DEFAULT_POST_IT_COLOR,
   type ColumnId,
+  type EvaluationProject,
+  type EvaluationWorkspace,
   type EvaluationRow,
   type PostItColor,
 } from './types/board';
@@ -55,6 +60,14 @@ const POST_IT_PALETTE: Array<{ id: PostItColor; label: string }> = [
   { id: 'purple', label: 'Roxo' },
 ];
 
+interface ImportedProjectPayload {
+  projectName?: unknown;
+  focalProblem?: unknown;
+  author?: unknown;
+  projectVersion?: unknown;
+  rows?: unknown;
+}
+
 function createCardId(): string {
   if (
     typeof crypto !== 'undefined' &&
@@ -74,8 +87,41 @@ function hasMeaningfulContent(value: string): boolean {
   return plain.length > 0;
 }
 
+function createExportFileName(project: EvaluationProject): string {
+  const projectSlug = project.name
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 50);
+
+  const formattedDate = new Date().toISOString().slice(0, 10);
+  const paddedVersion = String(project.version).padStart(3, '0');
+
+  return `quadro-avaliacao-${projectSlug || 'projeto'}-v${paddedVersion}-${formattedDate}.json`;
+}
+
+function getImportedProjectPayload(
+  parsed: unknown,
+): ImportedProjectPayload | null {
+  if (!parsed || typeof parsed !== 'object') {
+    return null;
+  }
+
+  const candidate = parsed as Record<string, unknown>;
+  if (!('rows' in candidate)) {
+    return null;
+  }
+
+  return candidate as ImportedProjectPayload;
+}
+
 function App() {
-  const [rows, setRows] = useState<EvaluationRow[]>(() => loadBoard());
+  const [workspace, setWorkspace] = useState<EvaluationWorkspace>(() =>
+    loadWorkspace(),
+  );
   const [composer, setComposer] = useState<ComposerState | null>(null);
   const [editingCard, setEditingCard] = useState<EditingCardState | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -84,9 +130,50 @@ function App() {
     columnId: ColumnId;
   } | null>(null);
 
+  const activeProject = useMemo(() => {
+    const byId = workspace.projects.find(
+      (project) => project.id === workspace.activeProjectId,
+    );
+
+    return byId ?? workspace.projects[0];
+  }, [workspace]);
+
+  const rows = activeProject?.rows ?? createInitialBoard();
+
+  const updateActiveProject = (
+    updater: (currentProject: EvaluationProject) => EvaluationProject,
+  ) => {
+    setWorkspace((currentWorkspace) => {
+      const activeProjectIndex = currentWorkspace.projects.findIndex(
+        (project) => project.id === currentWorkspace.activeProjectId,
+      );
+
+      if (activeProjectIndex < 0) {
+        return currentWorkspace;
+      }
+
+      const nextProjects = currentWorkspace.projects.map((project, index) => {
+        if (index !== activeProjectIndex) {
+          return project;
+        }
+
+        const nextProject = updater(project);
+        return {
+          ...nextProject,
+          updatedAt: new Date().toISOString(),
+        };
+      });
+
+      return {
+        ...currentWorkspace,
+        projects: nextProjects,
+      };
+    });
+  };
+
   useEffect(() => {
-    saveBoard(rows);
-  }, [rows]);
+    saveWorkspace(workspace);
+  }, [workspace]);
 
   const handleOpenComposer = (rowIndex: number, columnId: ColumnId) => {
     setComposer({ rowIndex, columnId, value: '' });
@@ -97,8 +184,9 @@ function App() {
       return;
     }
 
-    setRows((currentRows) =>
-      currentRows.map((row, index) =>
+    updateActiveProject((currentProject) => ({
+      ...currentProject,
+      rows: currentProject.rows.map((row, index) =>
         index === composer.rowIndex
           ? {
               ...row,
@@ -113,7 +201,7 @@ function App() {
             }
           : row,
       ),
-    );
+    }));
 
     setComposer(null);
   };
@@ -123,8 +211,9 @@ function App() {
     columnId: ColumnId,
     cardId: string,
   ) => {
-    setRows((currentRows) =>
-      currentRows.map((row, index) =>
+    updateActiveProject((currentProject) => ({
+      ...currentProject,
+      rows: currentProject.rows.map((row, index) =>
         index === rowIndex
           ? {
               ...row,
@@ -132,7 +221,7 @@ function App() {
             }
           : row,
       ),
-    );
+    }));
   };
 
   const handleStartEditingCard = (
@@ -150,8 +239,9 @@ function App() {
       return;
     }
 
-    setRows((currentRows) =>
-      currentRows.map((row, index) =>
+    updateActiveProject((currentProject) => ({
+      ...currentProject,
+      rows: currentProject.rows.map((row, index) =>
         index === editingCard.rowIndex
           ? {
               ...row,
@@ -163,7 +253,7 @@ function App() {
             }
           : row,
       ),
-    );
+    }));
 
     setEditingCard(null);
   };
@@ -261,9 +351,15 @@ function App() {
       }
 
       const payload = JSON.parse(raw) as DragCardPayload;
-      setRows((currentRows) =>
-        moveCardToTarget(currentRows, payload, toRowIndex, toColumnId),
-      );
+      updateActiveProject((currentProject) => ({
+        ...currentProject,
+        rows: moveCardToTarget(
+          currentProject.rows,
+          payload,
+          toRowIndex,
+          toColumnId,
+        ),
+      }));
     } catch {
       // Ignore malformed drag payloads
     } finally {
@@ -294,8 +390,9 @@ function App() {
     cardId: string,
     color: PostItColor,
   ) => {
-    setRows((currentRows) =>
-      currentRows.map((row, index) =>
+    updateActiveProject((currentProject) => ({
+      ...currentProject,
+      rows: currentProject.rows.map((row, index) =>
         index === rowIndex
           ? {
               ...row,
@@ -305,21 +402,88 @@ function App() {
             }
           : row,
       ),
-    );
+    }));
   };
 
   const handleResetBoard = () => {
-    setRows(createInitialBoard());
+    updateActiveProject((currentProject) => ({
+      ...currentProject,
+      rows: createInitialBoard(),
+    }));
     setComposer(null);
     setEditingCard(null);
   };
 
+  const handleSelectProject = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextProjectId = event.target.value;
+    if (!workspace.projects.some((project) => project.id === nextProjectId)) {
+      return;
+    }
+
+    setWorkspace((currentWorkspace) => ({
+      ...currentWorkspace,
+      activeProjectId: nextProjectId,
+    }));
+    setComposer(null);
+    setEditingCard(null);
+    setDragOverTarget(null);
+  };
+
+  const handleCreateProject = () => {
+    const nextProjectNumber = workspace.projects.length + 1;
+    const nextProject = createProject(`Projeto ${nextProjectNumber}`);
+
+    setWorkspace((currentWorkspace) => ({
+      activeProjectId: nextProject.id,
+      projects: [...currentWorkspace.projects, nextProject],
+    }));
+
+    setComposer(null);
+    setEditingCard(null);
+    setDragOverTarget(null);
+  };
+
+  const handleCreateProjectVersion = () => {
+    if (!activeProject) {
+      return;
+    }
+
+    const versionedProject = duplicateProjectVersion(activeProject);
+    setWorkspace((currentWorkspace) => ({
+      activeProjectId: versionedProject.id,
+      projects: [...currentWorkspace.projects, versionedProject],
+    }));
+
+    setComposer(null);
+    setEditingCard(null);
+    setDragOverTarget(null);
+  };
+
+  const handleUpdateActiveProjectField = (
+    field: 'name' | 'focalProblem' | 'author',
+    value: string,
+  ) => {
+    updateActiveProject((currentProject) => ({
+      ...currentProject,
+      [field]: value,
+    }));
+  };
+
   const handleExportBoard = () => {
+    if (!activeProject) {
+      return;
+    }
+
     const payload = {
       app: 'quadro-de-avaliacao',
-      version: 1,
+      schemaVersion: 2,
       exportedAt: new Date().toISOString(),
-      rows,
+      projectId: activeProject.id,
+      projectName: activeProject.name,
+      focalProblem: activeProject.focalProblem,
+      author: activeProject.author,
+      projectVersion: activeProject.version,
+      rows: activeProject.rows,
     };
 
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -327,10 +491,9 @@ function App() {
     });
     const url = URL.createObjectURL(blob);
 
-    const formattedDate = new Date().toISOString().slice(0, 10);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `quadro-avaliacao-${formattedDate}.json`;
+    link.download = createExportFileName(activeProject);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -351,10 +514,8 @@ function App() {
       const content = await file.text();
       const parsed = JSON.parse(content) as unknown;
 
-      const candidateRows =
-        parsed && typeof parsed === 'object' && 'rows' in (parsed as object)
-          ? (parsed as { rows: unknown }).rows
-          : parsed;
+      const importedProjectPayload = getImportedProjectPayload(parsed);
+      const candidateRows = importedProjectPayload?.rows ?? parsed;
 
       const normalizedRows = parseBoardRows(candidateRows);
       if (!normalizedRows) {
@@ -364,7 +525,27 @@ function App() {
         return;
       }
 
-      setRows(normalizedRows);
+      updateActiveProject((currentProject) => ({
+        ...currentProject,
+        name:
+          typeof importedProjectPayload?.projectName === 'string'
+            ? importedProjectPayload.projectName
+            : currentProject.name,
+        focalProblem:
+          typeof importedProjectPayload?.focalProblem === 'string'
+            ? importedProjectPayload.focalProblem
+            : currentProject.focalProblem,
+        author:
+          typeof importedProjectPayload?.author === 'string'
+            ? importedProjectPayload.author
+            : currentProject.author,
+        version:
+          typeof importedProjectPayload?.projectVersion === 'number' &&
+          importedProjectPayload.projectVersion > 0
+            ? Math.floor(importedProjectPayload.projectVersion)
+            : currentProject.version,
+        rows: normalizedRows,
+      }));
       setComposer(null);
       setEditingCard(null);
       setDragOverTarget(null);
@@ -392,7 +573,7 @@ function App() {
   const lastUpdated = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(new Date());
+  }).format(activeProject ? new Date(activeProject.updatedAt) : new Date());
 
   return (
     <div className='app-shell'>
@@ -412,6 +593,97 @@ function App() {
                 Organize stakeholders, problemas e soluções com cartões no
                 estilo post-it.
               </p>
+
+              <div className='project-manager mt-3'>
+                <div className='project-manager-row'>
+                  <label className='form-label mb-1' htmlFor='project-select'>
+                    Projeto
+                  </label>
+                  <div className='project-manager-actions'>
+                    <select
+                      id='project-select'
+                      className='form-select form-select-sm'
+                      value={activeProject?.id ?? ''}
+                      onChange={handleSelectProject}
+                    >
+                      {workspace.projects.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name} • v{project.version}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type='button'
+                      className='btn btn-sm btn-outline-secondary'
+                      onClick={handleCreateProject}
+                    >
+                      Novo projeto
+                    </button>
+                    <button
+                      type='button'
+                      className='btn btn-sm btn-outline-secondary'
+                      onClick={handleCreateProjectVersion}
+                      disabled={!activeProject}
+                    >
+                      Nova versão
+                    </button>
+                  </div>
+                </div>
+
+                <div className='project-manager-grid'>
+                  <div>
+                    <label className='form-label mb-1' htmlFor='project-name'>
+                      Nome
+                    </label>
+                    <input
+                      id='project-name'
+                      className='form-control form-control-sm'
+                      value={activeProject?.name ?? ''}
+                      onChange={(event) =>
+                        handleUpdateActiveProjectField(
+                          'name',
+                          event.target.value,
+                        )
+                      }
+                      placeholder='Nome do projeto'
+                    />
+                  </div>
+                  <div>
+                    <label className='form-label mb-1' htmlFor='project-author'>
+                      Autoria
+                    </label>
+                    <input
+                      id='project-author'
+                      className='form-control form-control-sm'
+                      value={activeProject?.author ?? ''}
+                      onChange={(event) =>
+                        handleUpdateActiveProjectField(
+                          'author',
+                          event.target.value,
+                        )
+                      }
+                      placeholder='Nome do autor'
+                    />
+                  </div>
+                  <div className='project-manager-focal'>
+                    <label className='form-label mb-1' htmlFor='project-focal'>
+                      Problema Focal
+                    </label>
+                    <input
+                      id='project-focal'
+                      className='form-control form-control-sm'
+                      value={activeProject?.focalProblem ?? ''}
+                      onChange={(event) =>
+                        handleUpdateActiveProjectField(
+                          'focalProblem',
+                          event.target.value,
+                        )
+                      }
+                      placeholder='Descreva o problema focal'
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className='board-kpis'>
