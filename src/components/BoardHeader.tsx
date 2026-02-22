@@ -15,6 +15,8 @@ interface BoardHeaderProps {
   onSelectProject: (event: ChangeEvent<HTMLSelectElement>) => void;
   onCreateProject: () => void;
   onCreateProjectVersion: () => void;
+  onDeleteProject: () => void;
+  canDeleteProject: boolean;
   onUpdateProjectField: (
     field: 'name' | 'focalProblem' | 'author',
     value: string,
@@ -35,6 +37,8 @@ export function BoardHeader({
   onSelectProject,
   onCreateProject,
   onCreateProjectVersion,
+  onDeleteProject,
+  canDeleteProject,
   onUpdateProjectField,
 }: BoardHeaderProps) {
   return (
@@ -140,6 +144,15 @@ export function BoardHeader({
                 >
                   <i className='bi bi-copy me-1' aria-hidden='true' />
                   Nova versão
+                </button>
+                <button
+                  type='button'
+                  className='btn btn-sm btn-outline-danger'
+                  onClick={onDeleteProject}
+                  disabled={!canDeleteProject}
+                >
+                  <i className='bi bi-trash me-1' aria-hidden='true' />
+                  Excluir projeto
                 </button>
               </div>
             </div>

@@ -112,6 +112,39 @@ export function useBoardWorkspace() {
     }));
   };
 
+  const deleteActiveProject = () => {
+    setWorkspace((currentWorkspace) => {
+      if (currentWorkspace.projects.length <= 1) {
+        return currentWorkspace;
+      }
+
+      const activeProjectIndex = currentWorkspace.projects.findIndex(
+        (project) => project.id === currentWorkspace.activeProjectId,
+      );
+
+      if (activeProjectIndex < 0) {
+        return currentWorkspace;
+      }
+
+      const nextProjects = currentWorkspace.projects.filter(
+        (project) => project.id !== currentWorkspace.activeProjectId,
+      );
+
+      const fallbackIndex = Math.max(0, activeProjectIndex - 1);
+      const nextActiveProjectId =
+        nextProjects[fallbackIndex]?.id ?? nextProjects[0]?.id;
+
+      if (!nextActiveProjectId) {
+        return currentWorkspace;
+      }
+
+      return {
+        activeProjectId: nextActiveProjectId,
+        projects: nextProjects,
+      };
+    });
+  };
+
   const importProjectAsNew = (payload: ImportedProjectInput) => {
     setWorkspace((currentWorkspace) => {
       const nextProject = createProject(
@@ -150,6 +183,7 @@ export function useBoardWorkspace() {
     selectProject,
     createNewProject,
     createNewVersion,
+    deleteActiveProject,
     updateActiveProjectField,
     importProjectAsNew,
   };

@@ -82,7 +82,7 @@
 
 .project-manager-actions {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) auto auto;
+  grid-template-columns: minmax(170px, 1fr) auto auto auto;
   gap: 0.5rem;
   align-items: center;
 }
@@ -450,6 +450,16 @@
 .board-help-text {
   font-size: clamp(1.45rem, 1.35rem + 0.4vw, 1.95rem);
   line-height: 1.4;
+}
+
+@media (max-width: 1399.98px) {
+  .project-manager-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .project-manager-actions .form-select {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 1199.98px) {

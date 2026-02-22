@@ -79,6 +79,7 @@ function App() {
     selectProject,
     createNewProject,
     createNewVersion,
+    deleteActiveProject,
     updateActiveProjectField,
     importProjectAsNew,
   } = useBoardWorkspace();
@@ -124,6 +125,45 @@ function App() {
 
   const handleCreateProjectVersion = () => {
     createNewVersion();
+    clearCardUiState();
+    clearDragState();
+  };
+
+  const handleRequestDeleteProject = async () => {
+    if (!activeProject) {
+      return;
+    }
+
+    if (workspace.projects.length <= 1) {
+      await showInfoDialog(
+        'Operação indisponível',
+        'É necessário manter ao menos um projeto no workspace.',
+      );
+      return;
+    }
+
+    const deleteChoice = await openDialog(
+      'Excluir projeto',
+      `Tem certeza que deseja excluir o projeto "${activeProject.name}"? Esta ação não pode ser desfeita.`,
+      [
+        {
+          value: 'confirm',
+          label: 'Excluir',
+          buttonClassName: 'btn-danger',
+        },
+        {
+          value: 'cancel',
+          label: 'Cancelar',
+          buttonClassName: 'btn-outline-secondary',
+        },
+      ],
+    );
+
+    if (deleteChoice !== 'confirm') {
+      return;
+    }
+
+    deleteActiveProject();
     clearCardUiState();
     clearDragState();
   };
@@ -360,6 +400,10 @@ function App() {
         onSelectProject={handleSelectProject}
         onCreateProject={handleCreateProject}
         onCreateProjectVersion={handleCreateProjectVersion}
+        onDeleteProject={() => {
+          void handleRequestDeleteProject();
+        }}
+        canDeleteProject={workspace.projects.length > 1}
         onUpdateProjectField={handleUpdateActiveProjectField}
       />
 
