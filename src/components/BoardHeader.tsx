@@ -58,8 +58,9 @@ export function BoardHeader({
     <section className='board-header'>
       <div className='container-fluid board-layout py-4 py-xl-5'>
         <div className='board-header-grid'>
-          <div className='d-flex flex-column gap-3'>
+          <div className='board-header-overview'>
             <div>
+              <span className='board-overline'>Painel colaborativo</span>
               <h1 className='mb-2 fw-semibold'>Quadro de Avaliação</h1>
               <p className='board-subtitle mb-0'>
                 Organize partes interessadas, problemas e soluções com cartões
@@ -67,18 +68,56 @@ export function BoardHeader({
               </p>
             </div>
 
+            <article className='board-current-project'>
+              <div className='board-current-project-main'>
+                <span className='board-current-project-label'>
+                  Projeto ativo
+                </span>
+                <strong className='board-current-project-name'>
+                  {activeProject?.name ?? 'Sem projeto selecionado'}
+                </strong>
+                <small className='board-current-project-meta'>
+                  Versão v{activeProject?.version ?? '-'}
+                  {activeProject?.author
+                    ? ` • ${activeProject.author}`
+                    : ' • Autoria não informada'}
+                </small>
+              </div>
+              <p className='board-current-project-focal mb-0'>
+                {activeProject?.focalProblem
+                  ? `Problema focal: ${activeProject.focalProblem}`
+                  : 'Defina o problema focal para guiar a análise das camadas.'}
+              </p>
+            </article>
+
             <div className='board-kpis'>
               <article className='kpi-card'>
-                <span className='kpi-label'>Cartões</span>
+                <div className='kpi-head'>
+                  <span className='kpi-label'>Cartões</span>
+                  <i className='bi bi-stickies' aria-hidden='true' />
+                </div>
                 <strong className='kpi-value'>{totalCards}</strong>
+                <small className='kpi-helper'>
+                  Itens registrados no quadro
+                </small>
               </article>
               <article className='kpi-card'>
-                <span className='kpi-label'>Camadas ativas</span>
+                <div className='kpi-head'>
+                  <span className='kpi-label'>Camadas ativas</span>
+                  <i className='bi bi-layers' aria-hidden='true' />
+                </div>
                 <strong className='kpi-value'>{activeLayers}/3</strong>
+                <small className='kpi-helper'>
+                  Níveis com conteúdo preenchido
+                </small>
               </article>
               <article className='kpi-card'>
-                <span className='kpi-label'>Partes interessadas</span>
+                <div className='kpi-head'>
+                  <span className='kpi-label'>Partes interessadas</span>
+                  <i className='bi bi-people' aria-hidden='true' />
+                </div>
                 <strong className='kpi-value'>{stakeholdersCount}</strong>
+                <small className='kpi-helper'>Registros na camada base</small>
               </article>
             </div>
           </div>
