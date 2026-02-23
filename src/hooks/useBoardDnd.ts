@@ -76,14 +76,6 @@ function moveCardToTarget(
     }
   }
 
-  if (
-    payload.fromRowIndex === toRowIndex &&
-    payload.fromColumnId === toColumnId &&
-    sourceIndex < insertionIndex
-  ) {
-    insertionIndex -= 1;
-  }
-
   const clampedIndex = Math.max(
     0,
     Math.min(insertionIndex, targetCards.length),
