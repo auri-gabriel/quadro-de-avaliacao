@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { AppTopbar } from './components/AppTopbar';
+import { AppFooter } from './components/AppFooter';
 import { AppDialogModal } from './components/AppDialogModal';
 import { BoardHeader } from './components/BoardHeader';
 import { BoardTable } from './components/BoardTable';
@@ -631,7 +632,7 @@ function App() {
   };
 
   return (
-    <div className='app-shell'>
+    <div className='app-shell min-vh-100 d-flex flex-column'>
       <AppTopbar lastUpdated={lastUpdated} />
       <BoardHeader
         totalCards={totalCards}
@@ -677,7 +678,7 @@ function App() {
         onCancelProjectDraft={cancelProjectDraft}
       />
 
-      <main className='container-fluid board-layout py-4 py-md-5'>
+      <main className='container-fluid board-layout py-4 py-md-5 flex-grow-1'>
         <BoardTable
           rows={rows}
           columnOrder={COLUMN_ORDER}
@@ -710,20 +711,9 @@ function App() {
           onCancelComposer={() => setComposer(null)}
           onOpenComposer={handleOpenComposer}
         />
-
-        <footer className='app-footer'>
-          <div className='app-footer-meta'>
-            <span className='app-footer-kicker'>Quadro digital</span>
-            <strong className='app-footer-title'>
-              {activeProject?.name ?? 'Projeto sem nome'}
-            </strong>
-          </div>
-          <small className='app-footer-note text-body-secondary'>
-            Quadro MVP para análise colaborativa • v
-            {activeProject?.version ?? 1}
-          </small>
-        </footer>
       </main>
+
+      <AppFooter />
 
       <AppDialogModal
         isOpen={Boolean(modalState)}
