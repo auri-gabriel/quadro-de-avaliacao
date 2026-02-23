@@ -397,6 +397,7 @@
 }
 
 .kanban-cell {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -405,8 +406,19 @@
   min-width: 0;
   min-height: 190px;
   padding: 0.5rem;
+  border: 1px solid transparent;
   background: var(--bs-tertiary-bg);
-  transition: background-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:focus-visible {
+    border-color: color-mix(in srgb, var(--bs-primary) 58%, white 42%);
+    box-shadow: 0 0 0 2px
+      color-mix(in srgb, var(--bs-primary) 20%, transparent 80%);
+    outline: 0;
+  }
 
   &[data-drop-target='true'] {
     background: color-mix(
@@ -414,6 +426,7 @@
       var(--bs-primary) 14%,
       var(--bs-tertiary-bg)
     );
+    border-color: color-mix(in srgb, var(--bs-primary) 45%, transparent 55%);
   }
 }
 
@@ -639,6 +652,12 @@
     var(--bs-border-color) 60%,
     var(--bs-primary) 40%
   );
+  opacity: 0.86;
+}
+
+.kanban-cell:hover .kanban-add-btn.is-subtle,
+.kanban-cell:focus-within .kanban-add-btn.is-subtle {
+  opacity: 1;
 }
 
 .kanban-empty-state {

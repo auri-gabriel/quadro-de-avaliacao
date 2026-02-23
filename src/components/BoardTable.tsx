@@ -172,6 +172,14 @@ export function BoardTable({
                     composer?.rowIndex === rowIndex &&
                     composer?.columnId === columnId;
                   const hasCards = cards.length > 0;
+                  const cellLabel = `${columnLabels[columnId]} • ${row.layerLabel}`;
+                  const cellHintId = `cell-help-${row.layerId}-${columnId}`;
+
+                  const handleOpenComposerFromCell = () => {
+                    if (!isComposerOpen) {
+                      onOpenComposer(rowIndex, columnId);
+                    }
+                  };
 
                   return (
                     <td
@@ -189,7 +197,17 @@ export function BoardTable({
                         onDragLeave={(event) =>
                           onCellDragLeave(event, rowIndex, columnId)
                         }
-                        aria-label={`Área de cartões: ${columnLabels[columnId]} • ${row.layerLabel}`}
+                        onDoubleClick={handleOpenComposerFromCell}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            handleOpenComposerFromCell();
+                          }
+                        }}
+                        tabIndex={isComposerOpen ? -1 : 0}
+                        role='region'
+                        aria-label={`Área de cartões: ${cellLabel}`}
+                        aria-describedby={cellHintId}
                         data-drop-target={
                           dragOverTarget?.rowIndex === rowIndex &&
                           dragOverTarget?.columnId === columnId
@@ -225,7 +243,7 @@ export function BoardTable({
                                   : undefined
                               }
                               tabIndex={editingCurrentCard ? -1 : 0}
-                              aria-label={`Cartão em ${columnLabels[columnId]} • ${row.layerLabel}`}
+                              aria-label={`Cartão em ${cellLabel}`}
                               draggable={!editingCurrentCard}
                               onDragStart={(event) =>
                                 onCardDragStart(
@@ -409,6 +427,10 @@ export function BoardTable({
                             {hasCards ? 'Adicionar cartão' : 'Novo cartão'}
                           </button>
                         )}
+
+                        <span className='visually-hidden' id={cellHintId}>
+                          Dica: use Enter ou Espaço para abrir um novo cartão.
+                        </span>
                       </div>
                     </td>
                   );
@@ -423,6 +445,11 @@ export function BoardTable({
         <small className='text-body-secondary'>
           <i className='bi bi-arrows-move me-1' aria-hidden='true' />
           Dica: arraste e solte os cartões entre qualquer linha e coluna.
+        </small>
+        <small className='text-body-secondary'>
+          <i className='bi bi-keyboard me-1' aria-hidden='true' />
+          Atalho: com a célula em foco, pressione Enter ou Espaço para criar um
+          cartão.
         </small>
       </div>
     </section>
