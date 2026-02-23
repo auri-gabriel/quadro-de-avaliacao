@@ -7,6 +7,7 @@ import {
   type EvaluationRow,
   type EvaluationWorkspace,
   type LayerId,
+  type LayerLabel,
   type PostItColor,
 } from '../types/board';
 
@@ -23,6 +24,12 @@ const POST_IT_COLORS: PostItColor[] = [
   'orange',
   'purple',
 ];
+
+const LAYER_LABELS: Record<LayerId, LayerLabel> = {
+  informal: 'Informal',
+  formal: 'Formal',
+  technical: 'Técnico',
+};
 
 function isPostItColor(value: unknown): value is PostItColor {
   return POST_IT_COLORS.includes(value as PostItColor);
@@ -60,9 +67,14 @@ function normalizeCard(card: BoardCard): BoardCard {
   };
 }
 
+function normalizeLayerLabel(layerId: LayerId): LayerLabel {
+  return LAYER_LABELS[layerId];
+}
+
 function normalizeRow(row: EvaluationRow): EvaluationRow {
   return {
     ...row,
+    layerLabel: normalizeLayerLabel(row.layerId),
     stakeholders: row.stakeholders.map(normalizeCard),
     issues: row.issues.map(normalizeCard),
     ideas: row.ideas.map(normalizeCard),

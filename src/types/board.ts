@@ -1,5 +1,6 @@
 export type LayerId = 'informal' | 'formal' | 'technical';
 export type ColumnId = 'stakeholders' | 'issues' | 'ideas';
+export type LayerLabel = 'Informal' | 'Formal' | 'Técnico';
 export type PostItColor =
   | 'yellow'
   | 'pink'
@@ -18,7 +19,7 @@ export interface BoardCard {
 
 export interface EvaluationRow {
   layerId: LayerId;
-  layerLabel: 'Informal' | 'Formal' | 'Tecnico';
+  layerLabel: LayerLabel;
   stakeholders: BoardCard[];
   issues: BoardCard[];
   ideas: BoardCard[];
@@ -57,7 +58,7 @@ export const INITIAL_EVALUATION_ROWS: EvaluationRow[] = [
   },
   {
     layerId: 'technical',
-    layerLabel: 'Tecnico',
+    layerLabel: 'Técnico',
     stakeholders: [],
     issues: [],
     ideas: [],
