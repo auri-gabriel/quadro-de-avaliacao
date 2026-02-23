@@ -168,6 +168,10 @@ export function BoardTable({
                 </th>
                 {columnOrder.map((columnId) => {
                   const cards = row[columnId];
+                  const isComposerOpen =
+                    composer?.rowIndex === rowIndex &&
+                    composer?.columnId === columnId;
+                  const hasCards = cards.length > 0;
 
                   return (
                     <td
@@ -185,6 +189,7 @@ export function BoardTable({
                         onDragLeave={(event) =>
                           onCellDragLeave(event, rowIndex, columnId)
                         }
+                        aria-label={`Área de cartões: ${columnLabels[columnId]} • ${row.layerLabel}`}
                         data-drop-target={
                           dragOverTarget?.rowIndex === rowIndex &&
                           dragOverTarget?.columnId === columnId
@@ -219,6 +224,8 @@ export function BoardTable({
                                   ? dropIndicatorTarget?.placement
                                   : undefined
                               }
+                              tabIndex={editingCurrentCard ? -1 : 0}
+                              aria-label={`Cartão em ${columnLabels[columnId]} • ${row.layerLabel}`}
                               draggable={!editingCurrentCard}
                               onDragStart={(event) =>
                                 onCardDragStart(
@@ -349,52 +356,57 @@ export function BoardTable({
                           );
                         })}
 
-                        {composer?.rowIndex === rowIndex &&
-                          composer?.columnId === columnId && (
-                            <div className='kanban-composer'>
-                              <RichTextCell
-                                id={`composer-${row.layerId}-${columnId}`}
-                                label={`Novo cartão em ${columnLabels[columnId]} para ${row.layerLabel}`}
-                                value={composer.value}
-                                onChange={onComposerValueChange}
-                                placeholder='Descreva o cartão'
-                              />
-                              <div className='kanban-composer-actions'>
-                                <button
-                                  type='button'
-                                  className='btn btn-sm btn-primary'
-                                  onClick={onSaveCard}
-                                  disabled={
-                                    !hasMeaningfulContent(composer.value)
-                                  }
-                                >
-                                  Adicionar
-                                </button>
-                                <button
-                                  type='button'
-                                  className='btn btn-sm btn-outline-secondary'
-                                  onClick={onCancelComposer}
-                                >
-                                  Cancelar
-                                </button>
-                              </div>
-                            </div>
-                          )}
+                        {!isComposerOpen && !hasCards && (
+                          <p className='kanban-empty-state mb-0'>
+                            Nenhum cartão nesta célula ainda.
+                          </p>
+                        )}
 
-                        {!(
-                          composer?.rowIndex === rowIndex &&
-                          composer?.columnId === columnId
-                        ) && (
+                        {isComposerOpen && (
+                          <div className='kanban-composer'>
+                            <RichTextCell
+                              id={`composer-${row.layerId}-${columnId}`}
+                              label={`Novo cartão em ${columnLabels[columnId]} para ${row.layerLabel}`}
+                              value={composer.value}
+                              onChange={onComposerValueChange}
+                              placeholder='Descreva o cartão'
+                            />
+                            <div className='kanban-composer-actions'>
+                              <button
+                                type='button'
+                                className='btn btn-sm btn-primary'
+                                onClick={onSaveCard}
+                                disabled={!hasMeaningfulContent(composer.value)}
+                              >
+                                Adicionar
+                              </button>
+                              <button
+                                type='button'
+                                className='btn btn-sm btn-outline-secondary'
+                                onClick={onCancelComposer}
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {!isComposerOpen && (
                           <button
                             type='button'
-                            className='btn btn-sm btn-primary kanban-add-btn'
+                            className={`btn btn-sm kanban-add-btn ${
+                              hasCards
+                                ? 'btn-outline-secondary is-subtle'
+                                : 'btn-primary'
+                            }`}
                             onClick={() => onOpenComposer(rowIndex, columnId)}
+                            aria-label={`Adicionar cartão em ${columnLabels[columnId]} para ${row.layerLabel}`}
                           >
                             <i
                               className='bi bi-plus-circle me-1'
                               aria-hidden='true'
                             />
-                            Novo cartão
+                            {hasCards ? 'Adicionar cartão' : 'Novo cartão'}
                           </button>
                         )}
                       </div>

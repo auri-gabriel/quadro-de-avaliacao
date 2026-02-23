@@ -313,6 +313,8 @@
 
 .board-table-wrapper {
   background: var(--bs-body-bg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .board-table {
@@ -326,6 +328,11 @@
     font-weight: 600;
     vertical-align: middle;
     text-align: left;
+  }
+
+  thead th:first-child {
+    left: 0;
+    z-index: 5;
   }
 
   tbody td,
@@ -350,11 +357,15 @@
 }
 
 .board-group-cell {
+  position: sticky;
+  left: 0;
+  z-index: 2;
   width: 12%;
   white-space: nowrap;
   font-size: 1.35rem;
   font-weight: 500;
   vertical-align: top;
+  background: var(--bs-body-bg);
 }
 
 .rich-text-editor {
@@ -455,6 +466,11 @@
 
   &:focus-within {
     box-shadow: 0 4px 10px rgba(9, 30, 66, 0.24);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 1px;
   }
 
   &[data-drop-indicator='true'][data-drop-placement='before']::before,
@@ -606,6 +622,33 @@
   gap: 0.35rem;
   font-weight: 600;
   border-width: 1px;
+}
+
+.kanban-add-btn.is-subtle {
+  --bs-btn-bg: transparent;
+  --bs-btn-color: var(--bs-secondary-color);
+  --bs-btn-border-color: color-mix(
+    in srgb,
+    var(--bs-border-color) 80%,
+    transparent 20%
+  );
+  --bs-btn-hover-color: var(--bs-body-color);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--bs-tertiary-bg) 82%, white 18%);
+  --bs-btn-hover-border-color: color-mix(
+    in srgb,
+    var(--bs-border-color) 60%,
+    var(--bs-primary) 40%
+  );
+}
+
+.kanban-empty-state {
+  border: 1px dashed
+    color-mix(in srgb, var(--bs-border-color) 82%, transparent 18%);
+  border-radius: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+  background: color-mix(in srgb, var(--bs-body-bg) 88%, transparent 12%);
 }
 
 .kanban-add-btn:focus-visible,
