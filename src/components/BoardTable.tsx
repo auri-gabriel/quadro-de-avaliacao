@@ -388,6 +388,7 @@ export function BoardTable({
                               value={composer.value}
                               onChange={onComposerValueChange}
                               placeholder='Descreva o cartão'
+                              autoFocus
                             />
                             <div className='kanban-composer-actions'>
                               <button

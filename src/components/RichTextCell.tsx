@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -7,6 +8,7 @@ interface RichTextCellProps {
   value: string;
   placeholder: string;
   onChange: (nextValue: string) => void;
+  autoFocus?: boolean;
 }
 
 const TOOLBAR_MODULES = {
@@ -25,10 +27,28 @@ export function RichTextCell({
   value,
   placeholder,
   onChange,
+  autoFocus = false,
 }: RichTextCellProps) {
+  const quillRef = useRef<ReactQuill | null>(null);
+
+  useEffect(() => {
+    if (!autoFocus) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      quillRef.current?.focus();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [autoFocus]);
+
   return (
     <div className='rich-text-editor' id={id} aria-label={label}>
       <ReactQuill
+        ref={quillRef}
         theme='snow'
         value={value}
         onChange={onChange}
