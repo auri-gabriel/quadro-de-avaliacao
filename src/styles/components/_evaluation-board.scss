@@ -320,7 +320,7 @@
 
   thead th {
     position: sticky;
-    top: 0;
+    top: -1px;
     z-index: 3;
     background: var(--bs-body-bg);
     font-weight: 600;
