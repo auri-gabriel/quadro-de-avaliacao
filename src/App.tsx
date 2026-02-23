@@ -12,7 +12,11 @@ import { AppDialogModal } from './components/AppDialogModal';
 import { BoardHeader } from './components/BoardHeader';
 import { BoardTable } from './components/BoardTable';
 import { useAppDialog } from './hooks/useAppDialog';
-import { parseBoardRows } from './lib/boardStorage';
+import {
+  applyCardOrder,
+  buildCardOrder,
+  parseBoardRows,
+} from './lib/boardStorage';
 import { useBoardCards } from './hooks/useBoardCards';
 import { useBoardDnd } from './hooks/useBoardDnd';
 import {
@@ -48,6 +52,7 @@ interface ImportedProjectPayload {
   author?: unknown;
   projectVersion?: unknown;
   rows?: unknown;
+  cardOrder?: unknown;
 }
 
 interface ProjectMetadataDraft {
@@ -419,7 +424,7 @@ function App() {
 
     const payload = {
       app: 'quadro-de-avaliacao',
-      schemaVersion: 2,
+      schemaVersion: 3,
       exportedAt: new Date().toISOString(),
       projectId: exportProject.id,
       projectName: exportProject.name,
@@ -427,6 +432,7 @@ function App() {
       author: exportProject.author,
       projectVersion: exportProject.version,
       rows: exportProject.rows,
+      cardOrder: buildCardOrder(exportProject.rows),
     };
 
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -522,6 +528,11 @@ function App() {
         return;
       }
 
+      const rowsWithImportedOrder = applyCardOrder(
+        normalizedRows,
+        importedProjectPayload?.cardOrder,
+      );
+
       const importChoice = await openDialog(
         'Importar arquivo',
         'Deseja importar como novo projeto ou sobrescrever o projeto atual?',
@@ -566,7 +577,7 @@ function App() {
             typeof importedProjectPayload?.projectVersion === 'number'
               ? importedProjectPayload.projectVersion
               : 1,
-          rows: normalizedRows,
+          rows: rowsWithImportedOrder,
         });
         clearCardUiState();
         clearDragState();
@@ -592,7 +603,7 @@ function App() {
           importedProjectPayload.projectVersion > 0
             ? Math.floor(importedProjectPayload.projectVersion)
             : currentProject.version,
-        rows: normalizedRows,
+        rows: rowsWithImportedOrder,
       }));
       clearCardUiState();
       clearDragState();

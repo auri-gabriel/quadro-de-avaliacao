@@ -1,6 +1,6 @@
 {
   "app": "quadro-de-avaliacao",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "exportedAt": "2026-02-21T20:30:00.000Z",
   "projectId": "exemplo-completo-v001",
   "projectName": "Exemplo Completo",
@@ -173,5 +173,58 @@
         }
       ]
     }
-  ]
+  ],
+  "cardOrder": {
+    "informal": {
+      "stakeholders": [
+        "inf-stk-1",
+        "inf-stk-2",
+        "inf-stk-3"
+      ],
+      "issues": [
+        "inf-iss-1",
+        "inf-iss-2",
+        "inf-iss-3"
+      ],
+      "ideas": [
+        "inf-ide-1",
+        "inf-ide-2",
+        "inf-ide-3"
+      ]
+    },
+    "formal": {
+      "stakeholders": [
+        "for-stk-1",
+        "for-stk-2",
+        "for-stk-3"
+      ],
+      "issues": [
+        "for-iss-1",
+        "for-iss-2",
+        "for-iss-3"
+      ],
+      "ideas": [
+        "for-ide-1",
+        "for-ide-2",
+        "for-ide-3"
+      ]
+    },
+    "technical": {
+      "stakeholders": [
+        "tec-stk-1",
+        "tec-stk-2",
+        "tec-stk-3"
+      ],
+      "issues": [
+        "tec-iss-1",
+        "tec-iss-2",
+        "tec-iss-3"
+      ],
+      "ideas": [
+        "tec-ide-1",
+        "tec-ide-2",
+        "tec-ide-3"
+      ]
+    }
+  }
 }

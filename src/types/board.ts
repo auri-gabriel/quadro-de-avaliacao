@@ -25,6 +25,9 @@ export interface EvaluationRow {
   ideas: BoardCard[];
 }
 
+export type ColumnCardOrder = Record<ColumnId, string[]>;
+export type CardOrderMap = Record<LayerId, ColumnCardOrder>;
+
 export interface EvaluationProject {
   id: string;
   name: string;

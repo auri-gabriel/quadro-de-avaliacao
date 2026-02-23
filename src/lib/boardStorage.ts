@@ -1,5 +1,6 @@
 import {
   DEFAULT_POST_IT_COLOR,
+  type CardOrderMap,
   type BoardCard,
   type ColumnId,
   type EvaluationProject,
@@ -81,6 +82,74 @@ function normalizeRow(row: EvaluationRow): EvaluationRow {
   };
 }
 
+function isStringArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === 'string')
+  );
+}
+
+function isCardOrderMap(value: unknown): value is CardOrderMap {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  return LAYERS.every((layerId) => {
+    const layer = candidate[layerId];
+
+    if (!layer || typeof layer !== 'object') {
+      return false;
+    }
+
+    const layerRecord = layer as Record<string, unknown>;
+    return COLUMNS.every((columnId) => isStringArray(layerRecord[columnId]));
+  });
+}
+
+function normalizeOrderedIds(ids: string[]): string[] {
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+
+  ids.forEach((id) => {
+    if (!seen.has(id)) {
+      seen.add(id);
+      normalized.push(id);
+    }
+  });
+
+  return normalized;
+}
+
+function orderCardsByIds(
+  cards: BoardCard[],
+  orderedIds: string[],
+): BoardCard[] {
+  const indexById = new Map<string, number>();
+  normalizeOrderedIds(orderedIds).forEach((id, index) => {
+    indexById.set(id, index);
+  });
+
+  return [...cards].sort((firstCard, secondCard) => {
+    const firstIndex = indexById.get(firstCard.id);
+    const secondIndex = indexById.get(secondCard.id);
+
+    if (firstIndex === undefined && secondIndex === undefined) {
+      return 0;
+    }
+
+    if (firstIndex === undefined) {
+      return 1;
+    }
+
+    if (secondIndex === undefined) {
+      return -1;
+    }
+
+    return firstIndex - secondIndex;
+  });
+}
+
 function isEvaluationRow(value: unknown): value is EvaluationRow {
   if (!value || typeof value !== 'object') {
     return false;
@@ -123,6 +192,45 @@ export function createInitialBoard(): EvaluationRow[] {
       ideas: [...row.ideas],
     }),
   );
+}
+
+export function buildCardOrder(rows: EvaluationRow[]): CardOrderMap {
+  return {
+    informal: {
+      stakeholders: rows[0]?.stakeholders.map((card) => card.id) ?? [],
+      issues: rows[0]?.issues.map((card) => card.id) ?? [],
+      ideas: rows[0]?.ideas.map((card) => card.id) ?? [],
+    },
+    formal: {
+      stakeholders: rows[1]?.stakeholders.map((card) => card.id) ?? [],
+      issues: rows[1]?.issues.map((card) => card.id) ?? [],
+      ideas: rows[1]?.ideas.map((card) => card.id) ?? [],
+    },
+    technical: {
+      stakeholders: rows[2]?.stakeholders.map((card) => card.id) ?? [],
+      issues: rows[2]?.issues.map((card) => card.id) ?? [],
+      ideas: rows[2]?.ideas.map((card) => card.id) ?? [],
+    },
+  };
+}
+
+export function applyCardOrder(
+  rows: EvaluationRow[],
+  cardOrder: unknown,
+): EvaluationRow[] {
+  if (!isCardOrderMap(cardOrder)) {
+    return rows;
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    stakeholders: orderCardsByIds(
+      row.stakeholders,
+      cardOrder[row.layerId].stakeholders,
+    ),
+    issues: orderCardsByIds(row.issues, cardOrder[row.layerId].issues),
+    ideas: orderCardsByIds(row.ideas, cardOrder[row.layerId].ideas),
+  }));
 }
 
 function normalizeProject(project: EvaluationProject): EvaluationProject {
