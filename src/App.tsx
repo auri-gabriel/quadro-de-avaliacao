@@ -109,6 +109,7 @@ function App() {
   } = useBoardWorkspace();
   const [undoStack, setUndoStack] = useState<EvaluationProject[]>([]);
   const [redoStack, setRedoStack] = useState<EvaluationProject[]>([]);
+  const [showBackToTopButton, setShowBackToTopButton] = useState(false);
   const isTimeTravelingRef = useRef(false);
 
   const updateActiveProjectWithHistory: UpdateActiveProject = useCallback(
@@ -182,6 +183,19 @@ function App() {
     setUndoStack([]);
     setRedoStack([]);
   }, [activeProject?.id]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTopButton(window.scrollY > 320);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const isProjectDraftDirty =
     projectDraft.name !== activeProjectMetadata.name ||
@@ -631,6 +645,10 @@ function App() {
     );
   };
 
+  const handleBackToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className='app-shell min-vh-100 d-flex flex-column'>
       <AppTopbar lastUpdated={lastUpdated} />
@@ -714,6 +732,18 @@ function App() {
       </main>
 
       <AppFooter />
+
+      {showBackToTopButton ? (
+        <button
+          type='button'
+          className='back-to-top-button btn btn-primary'
+          onClick={handleBackToTop}
+          aria-label='Voltar ao topo'
+          title='Voltar ao topo'
+        >
+          <i className='bi bi-arrow-up' aria-hidden='true' />
+        </button>
+      ) : null}
 
       <AppDialogModal
         isOpen={Boolean(modalState)}
