@@ -359,11 +359,24 @@
   left: 0;
   z-index: 2;
   width: 12%;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-size: 1.35rem;
   font-weight: 500;
   vertical-align: top;
   background: var(--bs-body-bg);
+
+  strong,
+  small {
+    display: block;
+    max-width: 100%;
+  }
+
+  small {
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
 }
 
 .rich-text-editor {

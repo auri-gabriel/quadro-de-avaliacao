@@ -1,6 +1,5 @@
-export type LayerId = 'informal' | 'formal' | 'technical';
-export type ColumnId = 'stakeholders' | 'issues' | 'ideas';
-export type LayerLabel = 'Informal' | 'Formal' | 'Técnico';
+export type LayerId = string;
+export type ColumnId = string;
 export type PostItColor =
   | 'yellow'
   | 'pink'
@@ -17,12 +16,29 @@ export interface BoardCard {
   color: PostItColor;
 }
 
+export interface BoardColumn {
+  id: ColumnId;
+  label: string;
+}
+
+export interface BoardLayer {
+  id: LayerId;
+  label: string;
+  description: string;
+}
+
+export interface BoardTemplate {
+  id: string;
+  name: string;
+  columns: BoardColumn[];
+  layers: BoardLayer[];
+}
+
 export interface EvaluationRow {
   layerId: LayerId;
-  layerLabel: LayerLabel;
-  stakeholders: BoardCard[];
-  issues: BoardCard[];
-  ideas: BoardCard[];
+  layerLabel: string;
+  layerDescription: string;
+  cards: Record<ColumnId, BoardCard[]>;
 }
 
 export type ColumnCardOrder = Record<ColumnId, string[]>;
@@ -36,6 +52,8 @@ export interface EvaluationProject {
   version: number;
   createdAt: string;
   updatedAt: string;
+  templateId: string;
+  template: BoardTemplate;
   rows: EvaluationRow[];
 }
 
@@ -44,26 +62,35 @@ export interface EvaluationWorkspace {
   projects: EvaluationProject[];
 }
 
-export const INITIAL_EVALUATION_ROWS: EvaluationRow[] = [
-  {
-    layerId: 'informal',
-    layerLabel: 'Informal',
-    stakeholders: [],
-    issues: [],
-    ideas: [],
-  },
-  {
-    layerId: 'formal',
-    layerLabel: 'Formal',
-    stakeholders: [],
-    issues: [],
-    ideas: [],
-  },
-  {
-    layerId: 'technical',
-    layerLabel: 'Técnico',
-    stakeholders: [],
-    issues: [],
-    ideas: [],
-  },
+export const CLASSIC_BOARD_TEMPLATE_ID = 'classic-3x3';
+
+export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
+  id: CLASSIC_BOARD_TEMPLATE_ID,
+  name: 'Quadro clássico (3x3)',
+  columns: [
+    { id: 'stakeholders', label: 'Partes Interessadas' },
+    { id: 'issues', label: 'Questões / Problemas' },
+    { id: 'ideas', label: 'Ideias / Soluções' },
+  ],
+  layers: [
+    {
+      id: 'informal',
+      label: 'Informal',
+      description: 'Aspectos sociais e culturais observados no território.',
+    },
+    {
+      id: 'formal',
+      label: 'Formal',
+      description: 'Processos institucionais, normas e práticas organizadas.',
+    },
+    {
+      id: 'technical',
+      label: 'Técnico',
+      description: 'Infraestrutura, recursos e requisitos técnicos envolvidos.',
+    },
+  ],
+};
+
+export const BUILTIN_BOARD_TEMPLATES: BoardTemplate[] = [
+  CLASSIC_BOARD_TEMPLATE,
 ];

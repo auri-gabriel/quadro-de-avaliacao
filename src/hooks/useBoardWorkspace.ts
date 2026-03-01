@@ -6,7 +6,9 @@ import {
   loadWorkspace,
   saveWorkspace,
 } from '../lib/boardStorage';
+import { CLASSIC_BOARD_TEMPLATE } from '../types/board';
 import type {
+  BoardTemplate,
   EvaluationProject,
   EvaluationRow,
   EvaluationWorkspace,
@@ -22,6 +24,7 @@ export interface ImportedProjectInput {
   focalProblem?: string;
   author?: string;
   version?: number;
+  template?: BoardTemplate;
   rows: EvaluationRow[];
 }
 
@@ -38,7 +41,8 @@ export function useBoardWorkspace() {
     return byId ?? workspace.projects[0];
   }, [workspace]);
 
-  const rows = activeProject?.rows ?? createInitialBoard();
+  const rows =
+    activeProject?.rows ?? createInitialBoard(CLASSIC_BOARD_TEMPLATE);
 
   const updateActiveProject: UpdateActiveProject = (
     updater: (currentProject: EvaluationProject) => EvaluationProject,
@@ -156,6 +160,7 @@ export function useBoardWorkspace() {
             typeof payload.version === 'number' && payload.version > 0
               ? Math.floor(payload.version)
               : 1,
+          template: payload.template,
           rows: payload.rows,
         },
       );

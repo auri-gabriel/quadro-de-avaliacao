@@ -22,6 +22,8 @@ interface BoardTableProps {
   rows: EvaluationRow[];
   columnOrder: ColumnId[];
   columnLabels: Record<ColumnId, string>;
+  canEnterStructureEditMode: boolean;
+  isStructureEditMode: boolean;
   postItPalette: PaletteColor[];
   composer: ComposerState | null;
   editingCard: EditingCardState | null;
@@ -88,6 +90,17 @@ interface BoardTableProps {
   onSaveCard: () => void;
   onCancelComposer: () => void;
   onOpenComposer: (rowIndex: number, columnId: ColumnId) => void;
+  onRenameColumn: (columnId: ColumnId, label: string) => void;
+  onRenameLayer: (
+    rowIndex: number,
+    field: 'title' | 'description',
+    value: string,
+  ) => void;
+  onAddColumn: () => void;
+  onRemoveColumn: (columnId: ColumnId) => void;
+  onAddLayer: () => void;
+  onRemoveLayer: (rowIndex: number) => void;
+  onToggleStructureEditMode: () => void;
 }
 
 function isEditingCard(
@@ -107,6 +120,8 @@ export function BoardTable({
   rows,
   columnOrder,
   columnLabels,
+  canEnterStructureEditMode,
+  isStructureEditMode,
   postItPalette,
   composer,
   editingCard,
@@ -132,26 +147,91 @@ export function BoardTable({
   onSaveCard,
   onCancelComposer,
   onOpenComposer,
+  onRenameColumn,
+  onRenameLayer,
+  onAddColumn,
+  onRemoveColumn,
+  onAddLayer,
+  onRemoveLayer,
+  onToggleStructureEditMode,
 }: BoardTableProps) {
+  const dataColumnWidth = `${88 / Math.max(1, columnOrder.length)}%`;
+
   return (
     <section className='board-panel'>
       <div className='board-table-wrapper'>
         <table className='table table-bordered align-middle mb-0 board-table'>
           <colgroup>
             <col style={{ width: '12%' }} />
-            <col style={{ width: '29.33%' }} />
-            <col style={{ width: '29.33%' }} />
-            <col style={{ width: '29.33%' }} />
+            {columnOrder.map((columnId) => (
+              <col key={columnId} style={{ width: dataColumnWidth }} />
+            ))}
           </colgroup>
           <thead>
             <tr>
               <th className='sticky-top' scope='col'>
-                Camadas
+                <div className='d-flex align-items-center justify-content-between gap-2'>
+                  <span>Camadas</span>
+                  {isStructureEditMode ? (
+                    <div className='d-inline-flex gap-1'>
+                      <button
+                        type='button'
+                        className='btn btn-sm btn-outline-secondary'
+                        onClick={onAddLayer}
+                        aria-label='Adicionar camada'
+                        title='Adicionar camada'
+                      >
+                        <i className='bi bi-plus' aria-hidden='true' />
+                      </button>
+                      <button
+                        type='button'
+                        className='btn btn-sm btn-outline-secondary'
+                        onClick={onAddColumn}
+                        aria-label='Adicionar coluna'
+                        title='Adicionar coluna'
+                      >
+                        <i
+                          className='bi bi-layout-three-columns'
+                          aria-hidden='true'
+                        />
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </th>
               {columnOrder.map((columnId) => (
                 <th className='sticky-top' scope='col' key={columnId}>
                   <div className='board-column-head'>
-                    <span>{columnLabels[columnId]}</span>
+                    {isStructureEditMode ? (
+                      <div className='d-flex align-items-center gap-1'>
+                        <input
+                          key={`${columnId}-${columnLabels[columnId]}`}
+                          className='form-control form-control-sm'
+                          defaultValue={columnLabels[columnId]}
+                          onBlur={(event) =>
+                            onRenameColumn(columnId, event.target.value)
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.currentTarget.blur();
+                            }
+                          }}
+                          aria-label='Nome da coluna'
+                        />
+                        <button
+                          type='button'
+                          className='btn btn-sm btn-outline-danger'
+                          onClick={() => onRemoveColumn(columnId)}
+                          disabled={columnOrder.length <= 1}
+                          aria-label={`Remover coluna ${columnLabels[columnId]}`}
+                          title='Remover coluna'
+                        >
+                          <i className='bi bi-x-lg' aria-hidden='true' />
+                        </button>
+                      </div>
+                    ) : (
+                      <span>{columnLabels[columnId]}</span>
+                    )}
                     <span className='badge text-bg-secondary'>
                       {getColumnCardCount(columnId)}
                     </span>
@@ -164,10 +244,67 @@ export function BoardTable({
             {rows.map((row, rowIndex) => (
               <tr key={row.layerId}>
                 <th scope='row' className='board-group-cell'>
-                  {row.layerLabel}
+                  {isStructureEditMode ? (
+                    <div className='d-flex flex-column gap-1'>
+                      <div className='d-flex align-items-center gap-1'>
+                        <input
+                          key={`${row.layerId}-${row.layerLabel}`}
+                          className='form-control form-control-sm'
+                          defaultValue={row.layerLabel}
+                          onBlur={(event) =>
+                            onRenameLayer(rowIndex, 'title', event.target.value)
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.currentTarget.blur();
+                            }
+                          }}
+                          aria-label='Título da camada'
+                        />
+                        <button
+                          type='button'
+                          className='btn btn-sm btn-outline-danger'
+                          onClick={() => onRemoveLayer(rowIndex)}
+                          disabled={rows.length <= 1}
+                          aria-label={`Remover camada ${row.layerLabel}`}
+                          title='Remover camada'
+                        >
+                          <i className='bi bi-x-lg' aria-hidden='true' />
+                        </button>
+                      </div>
+                      <input
+                        key={`${row.layerId}-${row.layerDescription}`}
+                        className='form-control form-control-sm'
+                        defaultValue={row.layerDescription}
+                        onBlur={(event) =>
+                          onRenameLayer(
+                            rowIndex,
+                            'description',
+                            event.target.value,
+                          )
+                        }
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.currentTarget.blur();
+                          }
+                        }}
+                        aria-label='Descrição da camada'
+                        placeholder='Descrição da camada'
+                      />
+                    </div>
+                  ) : (
+                    <div className='d-flex flex-column gap-1'>
+                      <strong>{row.layerLabel}</strong>
+                      {row.layerDescription ? (
+                        <small className='text-body-secondary'>
+                          {row.layerDescription}
+                        </small>
+                      ) : null}
+                    </div>
+                  )}
                 </th>
                 {columnOrder.map((columnId) => {
-                  const cards = row[columnId];
+                  const cards = row.cards[columnId] ?? [];
                   const isComposerOpen =
                     composer?.rowIndex === rowIndex &&
                     composer?.columnId === columnId;
@@ -447,6 +584,36 @@ export function BoardTable({
       </div>
 
       <div className='board-panel-footer mt-3'>
+        <button
+          type='button'
+          className='btn btn-sm btn-outline-secondary'
+          onClick={onToggleStructureEditMode}
+          aria-pressed={isStructureEditMode}
+        >
+          <i
+            className={`bi ${
+              isStructureEditMode ? 'bi-check2-square' : 'bi-pencil-square'
+            } me-1`}
+            aria-hidden='true'
+          />
+          {isStructureEditMode ? 'Sair da edição' : 'Editar estrutura'}
+        </button>
+        {isStructureEditMode ? (
+          <small className='text-body-secondary'>
+            <i className='bi bi-grid me-1' aria-hidden='true' />
+            Personalize colunas e camadas diretamente no cabeçalho da tabela.
+          </small>
+        ) : canEnterStructureEditMode ? (
+          <small className='text-body-secondary'>
+            <i className='bi bi-pencil me-1' aria-hidden='true' />
+            Use “Editar estrutura” para alterar títulos, descrições e colunas.
+          </small>
+        ) : (
+          <small className='text-body-secondary'>
+            <i className='bi bi-lock me-1' aria-hidden='true' />
+            Para editar a estrutura, deixe este projeto sem cartões.
+          </small>
+        )}
         <small className='text-body-secondary'>
           <i className='bi bi-arrows-move me-1' aria-hidden='true' />
           Dica: arraste e solte os cartões entre qualquer linha e coluna.

@@ -15,6 +15,9 @@ import { useAppDialog } from './hooks/useAppDialog';
 import {
   applyCardOrder,
   buildCardOrder,
+  createCustomTemplate,
+  createInitialBoard,
+  getBuiltInTemplates,
   parseBoardRows,
 } from './lib/boardStorage';
 import { useBoardCards } from './hooks/useBoardCards';
@@ -24,18 +27,15 @@ import {
   type UpdateActiveProject,
 } from './hooks/useBoardWorkspace';
 import {
+  CLASSIC_BOARD_TEMPLATE,
+  type BoardTemplate,
   type ColumnId,
   type EvaluationProject,
   type PostItColor,
 } from './types/board';
 
-const COLUMN_ORDER: ColumnId[] = ['stakeholders', 'issues', 'ideas'];
-
-const COLUMN_LABELS: Record<ColumnId, string> = {
-  stakeholders: 'Partes Interessadas',
-  issues: 'Questões / Problemas',
-  ideas: 'Ideias / Soluções',
-};
+const BUILTIN_TEMPLATES: BoardTemplate[] = getBuiltInTemplates();
+const CUSTOM_TEMPLATE_SELECTOR_ID = 'custom';
 
 const POST_IT_PALETTE: Array<{ id: PostItColor; label: string }> = [
   { id: 'yellow', label: 'Amarelo' },
@@ -51,6 +51,8 @@ interface ImportedProjectPayload {
   focalProblem?: unknown;
   author?: unknown;
   projectVersion?: unknown;
+  templateId?: unknown;
+  template?: unknown;
   rows?: unknown;
   cardOrder?: unknown;
 }
@@ -100,6 +102,42 @@ function cloneProjectSnapshot(project: EvaluationProject): EvaluationProject {
   return JSON.parse(JSON.stringify(project)) as EvaluationProject;
 }
 
+function getBuiltInTemplateById(templateId: string): BoardTemplate | undefined {
+  return BUILTIN_TEMPLATES.find((template) => template.id === templateId);
+}
+
+function isBuiltInTemplateId(templateId: string): boolean {
+  return Boolean(getBuiltInTemplateById(templateId));
+}
+
+function countProjectCards(project?: EvaluationProject): number {
+  if (!project) {
+    return 0;
+  }
+
+  return project.rows.reduce(
+    (total, row) =>
+      total +
+      Object.values(row.cards).reduce(
+        (columnTotal, cards) => columnTotal + cards.length,
+        0,
+      ),
+    0,
+  );
+}
+
+function toEditableCustomTemplate(
+  currentTemplate: BoardTemplate,
+  nextColumnLabels: string[],
+  nextLayerDefinitions: Array<{ label: string; description: string }>,
+): BoardTemplate | null {
+  return createCustomTemplate({
+    name: currentTemplate.name || 'Modelo personalizado',
+    columns: nextColumnLabels,
+    layers: nextLayerDefinitions,
+  });
+}
+
 function App() {
   const {
     workspace,
@@ -114,8 +152,10 @@ function App() {
   } = useBoardWorkspace();
   const [undoStack, setUndoStack] = useState<EvaluationProject[]>([]);
   const [redoStack, setRedoStack] = useState<EvaluationProject[]>([]);
+  const [isStructureEditMode, setStructureEditMode] = useState(false);
   const [showBackToTopButton, setShowBackToTopButton] = useState(false);
   const isTimeTravelingRef = useRef(false);
+  const activeTemplate = activeProject?.template ?? CLASSIC_BOARD_TEMPLATE;
 
   const updateActiveProjectWithHistory: UpdateActiveProject = useCallback(
     (updater) => {
@@ -149,7 +189,10 @@ function App() {
     handleChangeCardColor,
     handleResetBoard,
     hasMeaningfulContent,
-  } = useBoardCards({ updateActiveProject: updateActiveProjectWithHistory });
+  } = useBoardCards({
+    updateActiveProject: updateActiveProjectWithHistory,
+    activeTemplate,
+  });
   const {
     dragOverTarget,
     dropIndicatorTarget,
@@ -187,6 +230,7 @@ function App() {
   useEffect(() => {
     setUndoStack([]);
     setRedoStack([]);
+    setStructureEditMode(false);
   }, [activeProject?.id]);
 
   useEffect(() => {
@@ -206,6 +250,14 @@ function App() {
     projectDraft.name !== activeProjectMetadata.name ||
     projectDraft.focalProblem !== activeProjectMetadata.focalProblem ||
     projectDraft.author !== activeProjectMetadata.author;
+  const activeProjectCardCount = countProjectCards(activeProject);
+  const canChangeTemplate = activeProjectCardCount === 0;
+
+  useEffect(() => {
+    if (!canChangeTemplate && isStructureEditMode) {
+      setStructureEditMode(false);
+    }
+  }, [canChangeTemplate, isStructureEditMode]);
 
   const saveProjectDraft = () => {
     if (!activeProject) {
@@ -301,6 +353,218 @@ function App() {
     createNewVersion();
     clearCardUiState();
     clearDragState();
+  };
+
+  const handleChangeTemplate = async (templateId: string) => {
+    if (!activeProject) {
+      return;
+    }
+
+    if (!canChangeTemplate) {
+      await showInfoDialog(
+        'Troca de modelo bloqueada',
+        'Remova os cartões do projeto para poder trocar o modelo do quadro.',
+      );
+      return;
+    }
+
+    if (templateId === CUSTOM_TEMPLATE_SELECTOR_ID) {
+      const customTemplate = toEditableCustomTemplate(
+        activeTemplate,
+        activeTemplate.columns.map((column) => column.label),
+        activeTemplate.layers.map((layer) => ({
+          label: layer.label,
+          description: layer.description,
+        })),
+      );
+
+      if (!customTemplate) {
+        return;
+      }
+
+      updateActiveProjectWithHistory((currentProject) => ({
+        ...currentProject,
+        templateId: customTemplate.id,
+        template: customTemplate,
+        rows: createInitialBoard(customTemplate),
+      }));
+      clearCardUiState();
+      clearDragState();
+      return;
+    }
+
+    const nextTemplate = getBuiltInTemplateById(templateId);
+    if (!nextTemplate || nextTemplate.id === activeTemplate.id) {
+      return;
+    }
+
+    updateActiveProjectWithHistory((currentProject) => ({
+      ...currentProject,
+      templateId: nextTemplate.id,
+      template: nextTemplate,
+      rows: createInitialBoard(nextTemplate),
+    }));
+    clearCardUiState();
+    clearDragState();
+  };
+
+  const applyTemplateStructureChange = async (
+    nextColumnLabels: string[],
+    nextLayerDefinitions: Array<{ label: string; description: string }>,
+  ) => {
+    if (!activeProject) {
+      return;
+    }
+
+    if (!canChangeTemplate) {
+      await showInfoDialog(
+        'Edição de estrutura bloqueada',
+        'Remova os cartões do projeto para editar colunas e camadas.',
+      );
+      return;
+    }
+
+    const customTemplate = toEditableCustomTemplate(
+      activeTemplate,
+      nextColumnLabels,
+      nextLayerDefinitions,
+    );
+
+    if (!customTemplate) {
+      await showInfoDialog(
+        'Estrutura inválida',
+        'Mantenha ao menos uma coluna e uma camada com nome válido.',
+      );
+      return;
+    }
+
+    updateActiveProjectWithHistory((currentProject) => ({
+      ...currentProject,
+      templateId: customTemplate.id,
+      template: customTemplate,
+      rows: createInitialBoard(customTemplate),
+    }));
+    clearCardUiState();
+    clearDragState();
+  };
+
+  const handleRenameColumn = (columnId: ColumnId, label: string) => {
+    const nextLabel = label.trim();
+    if (!nextLabel) {
+      return;
+    }
+
+    const nextColumnLabels = activeTemplate.columns.map((column) =>
+      column.id === columnId ? nextLabel : column.label,
+    );
+    const nextLayerDefinitions = activeTemplate.layers.map((layer) => ({
+      label: layer.label,
+      description: layer.description,
+    }));
+    void applyTemplateStructureChange(nextColumnLabels, nextLayerDefinitions);
+  };
+
+  const handleRenameLayer = (
+    rowIndex: number,
+    field: 'title' | 'description',
+    value: string,
+  ) => {
+    const nextValue = value.trim();
+    if (rowIndex < 0 || rowIndex >= activeTemplate.layers.length) {
+      return;
+    }
+
+    if (field === 'title' && !nextValue) {
+      return;
+    }
+
+    const nextColumnLabels = activeTemplate.columns.map(
+      (column) => column.label,
+    );
+    const nextLayerDefinitions = activeTemplate.layers.map((layer, index) =>
+      index === rowIndex
+        ? {
+            label: field === 'title' ? nextValue : layer.label,
+            description:
+              field === 'description' ? nextValue : layer.description,
+          }
+        : {
+            label: layer.label,
+            description: layer.description,
+          },
+    );
+    void applyTemplateStructureChange(nextColumnLabels, nextLayerDefinitions);
+  };
+
+  const handleAddColumn = () => {
+    const nextColumnLabels = [
+      ...activeTemplate.columns.map((column) => column.label),
+      `Nova coluna ${activeTemplate.columns.length + 1}`,
+    ];
+    const nextLayerDefinitions = activeTemplate.layers.map((layer) => ({
+      label: layer.label,
+      description: layer.description,
+    }));
+    void applyTemplateStructureChange(nextColumnLabels, nextLayerDefinitions);
+  };
+
+  const handleRemoveColumn = (columnId: ColumnId) => {
+    const nextColumnLabels = activeTemplate.columns
+      .filter((column) => column.id !== columnId)
+      .map((column) => column.label);
+
+    const nextLayerDefinitions = activeTemplate.layers.map((layer) => ({
+      label: layer.label,
+      description: layer.description,
+    }));
+    void applyTemplateStructureChange(nextColumnLabels, nextLayerDefinitions);
+  };
+
+  const handleAddLayer = () => {
+    const nextColumnLabels = activeTemplate.columns.map(
+      (column) => column.label,
+    );
+    const nextLayerDefinitions = [
+      ...activeTemplate.layers.map((layer) => ({
+        label: layer.label,
+        description: layer.description,
+      })),
+      {
+        label: `Nova camada ${activeTemplate.layers.length + 1}`,
+        description: 'Descreva esta camada.',
+      },
+    ];
+    void applyTemplateStructureChange(nextColumnLabels, nextLayerDefinitions);
+  };
+
+  const handleRemoveLayer = (rowIndex: number) => {
+    const nextColumnLabels = activeTemplate.columns.map(
+      (column) => column.label,
+    );
+    const nextLayerDefinitions = activeTemplate.layers
+      .filter((_, index) => index !== rowIndex)
+      .map((layer) => ({
+        label: layer.label,
+        description: layer.description,
+      }));
+    void applyTemplateStructureChange(nextColumnLabels, nextLayerDefinitions);
+  };
+
+  const handleToggleStructureEditMode = async () => {
+    if (isStructureEditMode) {
+      setStructureEditMode(false);
+      return;
+    }
+
+    if (!canChangeTemplate) {
+      await showInfoDialog(
+        'Edição de estrutura bloqueada',
+        'Remova os cartões do projeto para editar colunas e camadas.',
+      );
+      return;
+    }
+
+    setStructureEditMode(true);
   };
 
   const handleRequestDeleteProject = async () => {
@@ -424,13 +688,15 @@ function App() {
 
     const payload = {
       app: 'quadro-de-avaliacao',
-      schemaVersion: 3,
+      schemaVersion: 4,
       exportedAt: new Date().toISOString(),
       projectId: exportProject.id,
       projectName: exportProject.name,
       focalProblem: exportProject.focalProblem,
       author: exportProject.author,
       projectVersion: exportProject.version,
+      templateId: exportProject.templateId,
+      template: exportProject.template,
       rows: exportProject.rows,
       cardOrder: buildCardOrder(exportProject.rows),
     };
@@ -519,7 +785,73 @@ function App() {
       const importedProjectPayload = getImportedProjectPayload(parsed);
       const candidateRows = importedProjectPayload?.rows ?? parsed;
 
-      const normalizedRows = parseBoardRows(candidateRows);
+      let importedTemplate = CLASSIC_BOARD_TEMPLATE;
+
+      if (typeof importedProjectPayload?.templateId === 'string') {
+        importedTemplate =
+          getBuiltInTemplateById(importedProjectPayload.templateId) ??
+          importedTemplate;
+      }
+
+      if (
+        importedProjectPayload?.template &&
+        typeof importedProjectPayload.template === 'object'
+      ) {
+        const templateCandidate = importedProjectPayload.template as Record<
+          string,
+          unknown
+        >;
+
+        const candidateColumns = Array.isArray(templateCandidate.columns)
+          ? templateCandidate.columns
+              .map((column) => {
+                if (!column || typeof column !== 'object') {
+                  return null;
+                }
+
+                const columnCandidate = column as Record<string, unknown>;
+                return typeof columnCandidate.label === 'string'
+                  ? columnCandidate.label
+                  : null;
+              })
+              .filter((label): label is string => Boolean(label))
+          : [];
+
+        const candidateLayers = Array.isArray(templateCandidate.layers)
+          ? templateCandidate.layers
+              .map((layer) => {
+                if (!layer || typeof layer !== 'object') {
+                  return null;
+                }
+
+                const layerCandidate = layer as Record<string, unknown>;
+                return typeof layerCandidate.label === 'string'
+                  ? layerCandidate.label
+                  : null;
+              })
+              .filter((label): label is string => Boolean(label))
+          : [];
+
+        const maybeCustomTemplate = createCustomTemplate({
+          name:
+            typeof templateCandidate.name === 'string'
+              ? templateCandidate.name
+              : 'Modelo importado',
+          columns: candidateColumns,
+          layers: candidateLayers.map((label) => ({
+            label,
+            description: '',
+          })),
+        });
+
+        if (maybeCustomTemplate) {
+          importedTemplate = maybeCustomTemplate;
+        }
+      }
+
+      const normalizedRows =
+        parseBoardRows(candidateRows, importedTemplate) ??
+        parseBoardRows(candidateRows, CLASSIC_BOARD_TEMPLATE);
       if (!normalizedRows) {
         await showInfoDialog(
           'Importação inválida',
@@ -577,6 +909,7 @@ function App() {
             typeof importedProjectPayload?.projectVersion === 'number'
               ? importedProjectPayload.projectVersion
               : 1,
+          template: importedTemplate,
           rows: rowsWithImportedOrder,
         });
         clearCardUiState();
@@ -603,6 +936,8 @@ function App() {
           importedProjectPayload.projectVersion > 0
             ? Math.floor(importedProjectPayload.projectVersion)
             : currentProject.version,
+        templateId: importedTemplate.id,
+        template: importedTemplate,
         rows: rowsWithImportedOrder,
       }));
       clearCardUiState();
@@ -617,17 +952,28 @@ function App() {
     }
   };
 
-  const getColumnCardCount = (columnId: ColumnId): number =>
-    rows.reduce((total, row) => total + row[columnId].length, 0);
+  const columnOrder = activeTemplate.columns.map((column) => column.id);
+  const columnLabels = activeTemplate.columns.reduce<Record<ColumnId, string>>(
+    (accumulator, column) => {
+      accumulator[column.id] = column.label;
+      return accumulator;
+    },
+    {},
+  );
 
-  const totalCards = COLUMN_ORDER.reduce(
+  const getColumnCardCount = (columnId: ColumnId): number =>
+    rows.reduce((total, row) => total + (row.cards[columnId]?.length ?? 0), 0);
+
+  const totalCards = columnOrder.reduce(
     (total, columnId) => total + getColumnCardCount(columnId),
     0,
   );
 
-  const activeLayers = rows.filter(
-    (row) => row.stakeholders.length + row.issues.length + row.ideas.length > 0,
+  const activeLayers = rows.filter((row) =>
+    Object.values(row.cards).some((cards) => cards.length > 0),
   ).length;
+
+  const primaryColumn = activeTemplate.columns[0];
 
   const lastUpdated = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'medium',
@@ -666,9 +1012,29 @@ function App() {
       <BoardHeader
         totalCards={totalCards}
         activeLayers={activeLayers}
-        stakeholdersCount={getColumnCardCount('stakeholders')}
+        totalLayers={activeTemplate.layers.length}
+        primaryColumnLabel={primaryColumn?.label ?? 'Primeira coluna'}
+        primaryColumnCount={
+          primaryColumn ? getColumnCardCount(primaryColumn.id) : 0
+        }
         workspace={workspace}
         activeProject={activeProject}
+        templateOptions={[
+          ...BUILTIN_TEMPLATES.map((template) => ({
+            id: template.id,
+            name: template.name,
+          })),
+          { id: CUSTOM_TEMPLATE_SELECTOR_ID, name: 'Modelo personalizado' },
+        ]}
+        selectedTemplateId={
+          isBuiltInTemplateId(activeTemplate.id)
+            ? activeTemplate.id
+            : CUSTOM_TEMPLATE_SELECTOR_ID
+        }
+        canChangeTemplate={canChangeTemplate}
+        onChangeTemplate={(templateId) => {
+          void handleChangeTemplate(templateId);
+        }}
         fileInputRef={fileInputRef}
         onImportBoard={handleImportBoard}
         onOpenFilePicker={handleOpenFilePicker}
@@ -710,8 +1076,10 @@ function App() {
       <main className='container-fluid board-layout py-4 py-md-5 flex-grow-1'>
         <BoardTable
           rows={rows}
-          columnOrder={COLUMN_ORDER}
-          columnLabels={COLUMN_LABELS}
+          columnOrder={columnOrder}
+          columnLabels={columnLabels}
+          canEnterStructureEditMode={canChangeTemplate}
+          isStructureEditMode={isStructureEditMode}
           postItPalette={POST_IT_PALETTE}
           composer={composer}
           editingCard={editingCard}
@@ -739,6 +1107,15 @@ function App() {
           onSaveCard={handleSaveCard}
           onCancelComposer={() => setComposer(null)}
           onOpenComposer={handleOpenComposer}
+          onRenameColumn={handleRenameColumn}
+          onRenameLayer={handleRenameLayer}
+          onAddColumn={handleAddColumn}
+          onRemoveColumn={handleRemoveColumn}
+          onAddLayer={handleAddLayer}
+          onRemoveLayer={handleRemoveLayer}
+          onToggleStructureEditMode={() => {
+            void handleToggleStructureEditMode();
+          }}
         />
       </main>
 

@@ -36,9 +36,13 @@ function moveCardToTarget(
 ): EvaluationRow[] {
   const nextRows = currentRows.map((row) => ({
     ...row,
-    stakeholders: [...row.stakeholders],
-    issues: [...row.issues],
-    ideas: [...row.ideas],
+    cards: Object.entries(row.cards).reduce<EvaluationRow['cards']>(
+      (accumulator, [columnId, cards]) => {
+        accumulator[columnId] = [...cards];
+        return accumulator;
+      },
+      {},
+    ),
   }));
 
   const sourceRow = nextRows[payload.fromRowIndex];
@@ -51,7 +55,11 @@ function moveCardToTarget(
     return currentRows;
   }
 
-  const sourceCards = sourceRow[payload.fromColumnId];
+  const sourceCards = sourceRow.cards[payload.fromColumnId];
+  if (!sourceCards) {
+    return currentRows;
+  }
+
   const sourceIndex = sourceCards.findIndex(
     (card) => card.id === payload.cardId,
   );
@@ -64,7 +72,11 @@ function moveCardToTarget(
     return currentRows;
   }
 
-  const targetCards = targetRow[toColumnId];
+  const targetCards = targetRow.cards[toColumnId];
+  if (!targetCards) {
+    return currentRows;
+  }
+
   let insertionIndex = targetCards.length;
 
   if (targetCardId) {

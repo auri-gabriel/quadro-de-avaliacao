@@ -9,12 +9,23 @@ interface ProjectMetadataDraft {
   author: string;
 }
 
+interface BoardTemplateOption {
+  id: string;
+  name: string;
+}
+
 interface BoardHeaderProps {
   totalCards: number;
   activeLayers: number;
-  stakeholdersCount: number;
+  totalLayers: number;
+  primaryColumnLabel: string;
+  primaryColumnCount: number;
   workspace: EvaluationWorkspace;
   activeProject?: EvaluationProject;
+  templateOptions: BoardTemplateOption[];
+  selectedTemplateId: string;
+  canChangeTemplate: boolean;
+  onChangeTemplate: (templateId: string) => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
   onImportBoard: (event: ChangeEvent<HTMLInputElement>) => Promise<void>;
   onOpenFilePicker: () => void;
@@ -39,9 +50,15 @@ interface BoardHeaderProps {
 export function BoardHeader({
   totalCards,
   activeLayers,
-  stakeholdersCount,
+  totalLayers,
+  primaryColumnLabel,
+  primaryColumnCount,
   workspace,
   activeProject,
+  templateOptions,
+  selectedTemplateId,
+  canChangeTemplate,
+  onChangeTemplate,
   fileInputRef,
   onImportBoard,
   onOpenFilePicker,
@@ -114,17 +131,19 @@ export function BoardHeader({
                   <span className='kpi-label'>Camadas ativas</span>
                   <i className='bi bi-layers' aria-hidden='true' />
                 </div>
-                <strong className='kpi-value'>{activeLayers}/3</strong>
+                <strong className='kpi-value'>
+                  {activeLayers}/{totalLayers}
+                </strong>
                 <small className='kpi-helper'>
                   Níveis com conteúdo preenchido
                 </small>
               </article>
               <article className='kpi-card'>
                 <div className='kpi-head'>
-                  <span className='kpi-label'>Partes interessadas</span>
+                  <span className='kpi-label'>{primaryColumnLabel}</span>
                   <i className='bi bi-people' aria-hidden='true' />
                 </div>
-                <strong className='kpi-value'>{stakeholdersCount}</strong>
+                <strong className='kpi-value'>{primaryColumnCount}</strong>
                 <small className='kpi-helper'>Registros na camada base</small>
               </article>
             </div>
@@ -197,6 +216,27 @@ export function BoardHeader({
                   <i className='bi bi-copy me-1' aria-hidden='true' />
                   Nova versão
                 </button>
+              </div>
+            </div>
+
+            <div className='project-manager-row mt-2'>
+              <label className='form-label mb-1' htmlFor='template-select'>
+                Modelo do quadro
+              </label>
+              <div className='project-manager-actions'>
+                <select
+                  id='template-select'
+                  className='form-select form-select-sm'
+                  value={selectedTemplateId}
+                  onChange={(event) => onChangeTemplate(event.target.value)}
+                  disabled={!activeProject || !canChangeTemplate}
+                >
+                  {templateOptions.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

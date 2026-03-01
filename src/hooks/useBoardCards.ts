@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createInitialBoard } from '../lib/boardStorage';
 import {
   DEFAULT_POST_IT_COLOR,
+  type BoardTemplate,
   type ColumnId,
   type PostItColor,
 } from '../types/board';
@@ -22,6 +23,7 @@ export interface EditingCardState {
 
 interface UseBoardCardsParams {
   updateActiveProject: UpdateActiveProject;
+  activeTemplate?: BoardTemplate;
 }
 
 function createCardId(): string {
@@ -44,7 +46,10 @@ export function hasMeaningfulContent(value: string): boolean {
   return plain.length > 0;
 }
 
-export function useBoardCards({ updateActiveProject }: UseBoardCardsParams) {
+export function useBoardCards({
+  updateActiveProject,
+  activeTemplate,
+}: UseBoardCardsParams) {
   const [composer, setComposer] = useState<ComposerState | null>(null);
   const [editingCard, setEditingCard] = useState<EditingCardState | null>(null);
 
@@ -68,14 +73,17 @@ export function useBoardCards({ updateActiveProject }: UseBoardCardsParams) {
         index === composer.rowIndex
           ? {
               ...row,
-              [composer.columnId]: [
-                ...row[composer.columnId],
-                {
-                  id: createCardId(),
-                  content: composer.value,
-                  color: DEFAULT_POST_IT_COLOR,
-                },
-              ],
+              cards: {
+                ...row.cards,
+                [composer.columnId]: [
+                  ...(row.cards[composer.columnId] ?? []),
+                  {
+                    id: createCardId(),
+                    content: composer.value,
+                    color: DEFAULT_POST_IT_COLOR,
+                  },
+                ],
+              },
             }
           : row,
       ),
@@ -95,7 +103,12 @@ export function useBoardCards({ updateActiveProject }: UseBoardCardsParams) {
         index === rowIndex
           ? {
               ...row,
-              [columnId]: row[columnId].filter((card) => card.id !== cardId),
+              cards: {
+                ...row.cards,
+                [columnId]: (row.cards[columnId] ?? []).filter(
+                  (card) => card.id !== cardId,
+                ),
+              },
             }
           : row,
       ),
@@ -123,11 +136,16 @@ export function useBoardCards({ updateActiveProject }: UseBoardCardsParams) {
         index === editingCard.rowIndex
           ? {
               ...row,
-              [editingCard.columnId]: row[editingCard.columnId].map((card) =>
-                card.id === editingCard.cardId
-                  ? { ...card, content: editingCard.value }
-                  : card,
-              ),
+              cards: {
+                ...row.cards,
+                [editingCard.columnId]: (
+                  row.cards[editingCard.columnId] ?? []
+                ).map((card) =>
+                  card.id === editingCard.cardId
+                    ? { ...card, content: editingCard.value }
+                    : card,
+                ),
+              },
             }
           : row,
       ),
@@ -148,9 +166,12 @@ export function useBoardCards({ updateActiveProject }: UseBoardCardsParams) {
         index === rowIndex
           ? {
               ...row,
-              [columnId]: row[columnId].map((card) =>
-                card.id === cardId ? { ...card, color } : card,
-              ),
+              cards: {
+                ...row.cards,
+                [columnId]: (row.cards[columnId] ?? []).map((card) =>
+                  card.id === cardId ? { ...card, color } : card,
+                ),
+              },
             }
           : row,
       ),
@@ -158,9 +179,13 @@ export function useBoardCards({ updateActiveProject }: UseBoardCardsParams) {
   };
 
   const handleResetBoard = () => {
+    if (!activeTemplate) {
+      return;
+    }
+
     updateActiveProject((currentProject) => ({
       ...currentProject,
-      rows: createInitialBoard(),
+      rows: createInitialBoard(activeTemplate),
     }));
     clearCardUiState();
   };
