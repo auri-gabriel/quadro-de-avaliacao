@@ -76,17 +76,19 @@ export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
     {
       id: 'informal',
       label: 'Informal',
-      description: 'Aspectos sociais e culturais observados no território.',
+      description:
+        'Influencia ou sofre impacto, direta ou indiretamente, das demais camadas.',
     },
     {
       id: 'formal',
       label: 'Formal',
-      description: 'Processos institucionais, normas e práticas organizadas.',
+      description:
+        'Quem opera o sistema técnico, fornece ou necessita de informações.',
     },
     {
       id: 'technical',
       label: 'Técnico',
-      description: 'Infraestrutura, recursos e requisitos técnicos envolvidos.',
+      description: 'Quem produz e/ou mantém o sistema técnico.',
     },
   ],
 };
