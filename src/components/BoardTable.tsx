@@ -23,6 +23,7 @@ interface BoardTableProps {
   columnOrder: ColumnId[];
   columnLabels: Record<ColumnId, string>;
   canEnterStructureEditMode: boolean;
+  isFixedTemplate: boolean;
   isStructureEditMode: boolean;
   postItPalette: PaletteColor[];
   composer: ComposerState | null;
@@ -121,6 +122,7 @@ export function BoardTable({
   columnOrder,
   columnLabels,
   canEnterStructureEditMode,
+  isFixedTemplate,
   isStructureEditMode,
   postItPalette,
   composer,
@@ -589,6 +591,7 @@ export function BoardTable({
           className='btn btn-sm btn-outline-secondary'
           onClick={onToggleStructureEditMode}
           aria-pressed={isStructureEditMode}
+          disabled={!canEnterStructureEditMode}
         >
           <i
             className={`bi ${
@@ -602,6 +605,12 @@ export function BoardTable({
           <small className='text-body-secondary'>
             <i className='bi bi-grid me-1' aria-hidden='true' />
             Personalize colunas e camadas diretamente no cabeçalho da tabela.
+          </small>
+        ) : isFixedTemplate ? (
+          <small className='text-body-secondary'>
+            <i className='bi bi-lock me-1' aria-hidden='true' />
+            Quadro fixo: selecione “Modelo personalizado” para editar a
+            estrutura.
           </small>
         ) : canEnterStructureEditMode ? (
           <small className='text-body-secondary'>

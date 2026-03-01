@@ -252,12 +252,14 @@ function App() {
     projectDraft.author !== activeProjectMetadata.author;
   const activeProjectCardCount = countProjectCards(activeProject);
   const canChangeTemplate = activeProjectCardCount === 0;
+  const isFixedTemplate = isBuiltInTemplateId(activeTemplate.id);
+  const canEnterStructureEditMode = canChangeTemplate && !isFixedTemplate;
 
   useEffect(() => {
-    if (!canChangeTemplate && isStructureEditMode) {
+    if (!canEnterStructureEditMode && isStructureEditMode) {
       setStructureEditMode(false);
     }
-  }, [canChangeTemplate, isStructureEditMode]);
+  }, [canEnterStructureEditMode, isStructureEditMode]);
 
   const saveProjectDraft = () => {
     if (!activeProject) {
@@ -556,7 +558,15 @@ function App() {
       return;
     }
 
-    if (!canChangeTemplate) {
+    if (!canEnterStructureEditMode) {
+      if (isFixedTemplate) {
+        await showInfoDialog(
+          'Edição indisponível',
+          'Este é um quadro fixo. Selecione “Modelo personalizado” para editar a estrutura.',
+        );
+        return;
+      }
+
       await showInfoDialog(
         'Edição de estrutura bloqueada',
         'Remova os cartões do projeto para editar colunas e camadas.',
@@ -1078,7 +1088,8 @@ function App() {
           rows={rows}
           columnOrder={columnOrder}
           columnLabels={columnLabels}
-          canEnterStructureEditMode={canChangeTemplate}
+          canEnterStructureEditMode={canEnterStructureEditMode}
+          isFixedTemplate={isFixedTemplate}
           isStructureEditMode={isStructureEditMode}
           postItPalette={POST_IT_PALETTE}
           composer={composer}
