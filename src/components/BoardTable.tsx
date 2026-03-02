@@ -1,4 +1,5 @@
 import { RichTextCell } from './RichTextCell';
+import { useTranslation } from 'react-i18next';
 import type {
   BoardCard,
   ColumnId,
@@ -157,6 +158,7 @@ export function BoardTable({
   onRemoveLayer,
   onToggleStructureEditMode,
 }: BoardTableProps) {
+  const { t } = useTranslation();
   const dataColumnWidth = `${88 / Math.max(1, columnOrder.length)}%`;
 
   return (
@@ -173,15 +175,15 @@ export function BoardTable({
             <tr>
               <th className='sticky-top' scope='col'>
                 <div className='d-flex align-items-center justify-content-between gap-2'>
-                  <span>Camadas</span>
+                  <span>{t('boardTable.layers')}</span>
                   {isStructureEditMode ? (
                     <div className='d-inline-flex gap-1'>
                       <button
                         type='button'
                         className='btn btn-sm btn-outline-secondary'
                         onClick={onAddLayer}
-                        aria-label='Adicionar camada'
-                        title='Adicionar camada'
+                        aria-label={t('boardTable.addLayer')}
+                        title={t('boardTable.addLayer')}
                       >
                         <i className='bi bi-plus' aria-hidden='true' />
                       </button>
@@ -189,8 +191,8 @@ export function BoardTable({
                         type='button'
                         className='btn btn-sm btn-outline-secondary'
                         onClick={onAddColumn}
-                        aria-label='Adicionar coluna'
-                        title='Adicionar coluna'
+                        aria-label={t('boardTable.addColumn')}
+                        title={t('boardTable.addColumn')}
                       >
                         <i
                           className='bi bi-layout-three-columns'
@@ -218,15 +220,17 @@ export function BoardTable({
                               event.currentTarget.blur();
                             }
                           }}
-                          aria-label='Nome da coluna'
+                          aria-label={t('boardTable.columnName')}
                         />
                         <button
                           type='button'
                           className='btn btn-sm btn-outline-danger'
                           onClick={() => onRemoveColumn(columnId)}
                           disabled={columnOrder.length <= 1}
-                          aria-label={`Remover coluna ${columnLabels[columnId]}`}
-                          title='Remover coluna'
+                          aria-label={t('boardTable.removeColumnNamed', {
+                            name: columnLabels[columnId],
+                          })}
+                          title={t('boardTable.removeColumn')}
                         >
                           <i className='bi bi-x-lg' aria-hidden='true' />
                         </button>
@@ -261,15 +265,17 @@ export function BoardTable({
                               event.currentTarget.blur();
                             }
                           }}
-                          aria-label='Título da camada'
+                          aria-label={t('boardTable.layerTitle')}
                         />
                         <button
                           type='button'
                           className='btn btn-sm btn-outline-danger'
                           onClick={() => onRemoveLayer(rowIndex)}
                           disabled={rows.length <= 1}
-                          aria-label={`Remover camada ${row.layerLabel}`}
-                          title='Remover camada'
+                          aria-label={t('boardTable.removeLayerNamed', {
+                            name: row.layerLabel,
+                          })}
+                          title={t('boardTable.removeLayer')}
                         >
                           <i className='bi bi-x-lg' aria-hidden='true' />
                         </button>
@@ -290,8 +296,8 @@ export function BoardTable({
                             event.currentTarget.blur();
                           }
                         }}
-                        aria-label='Descrição da camada'
-                        placeholder='Descrição da camada'
+                        aria-label={t('boardTable.layerDescription')}
+                        placeholder={t('boardTable.layerDescription')}
                       />
                     </div>
                   ) : (
@@ -349,7 +355,9 @@ export function BoardTable({
                         }}
                         tabIndex={isComposerOpen ? -1 : 0}
                         role='region'
-                        aria-label={`Área de cartões: ${cellLabel}`}
+                        aria-label={t('boardTable.cardsArea', {
+                          name: cellLabel,
+                        })}
                         aria-describedby={cellHintId}
                         data-drop-target={
                           dragOverTarget?.rowIndex === rowIndex &&
@@ -386,7 +394,9 @@ export function BoardTable({
                                   : undefined
                               }
                               tabIndex={editingCurrentCard ? -1 : 0}
-                              aria-label={`Cartão em ${cellLabel}`}
+                              aria-label={t('boardTable.cardInCell', {
+                                name: cellLabel,
+                              })}
                               draggable={!editingCurrentCard}
                               onDragStart={(event) =>
                                 onCardDragStart(
@@ -416,10 +426,12 @@ export function BoardTable({
                                 <div className='kanban-card-editor'>
                                   <RichTextCell
                                     id={`edit-${card.id}`}
-                                    label='Editar cartão'
+                                    label={t('boardTable.editCard')}
                                     value={editingValue}
                                     onChange={onCardValueChange}
-                                    placeholder='Edite o conteúdo do cartão'
+                                    placeholder={t(
+                                      'boardTable.editCardPlaceholder',
+                                    )}
                                   />
                                   <div className='kanban-card-editor-actions'>
                                     <button
@@ -430,14 +442,14 @@ export function BoardTable({
                                         !hasMeaningfulContent(editingValue)
                                       }
                                     >
-                                      Salvar
+                                      {t('boardTable.save')}
                                     </button>
                                     <button
                                       type='button'
                                       className='btn btn-sm btn-outline-secondary'
                                       onClick={onCancelEditingCard}
                                     >
-                                      Cancelar
+                                      {t('boardTable.cancel')}
                                     </button>
                                   </div>
                                 </div>
@@ -468,12 +480,12 @@ export function BoardTable({
                                       className='bi bi-pencil-square me-1'
                                       aria-hidden='true'
                                     />
-                                    Editar
+                                    {t('boardTable.edit')}
                                   </button>
                                   <div
                                     className='kanban-color-palette'
                                     role='group'
-                                    aria-label='Selecionar cor do post-it'
+                                    aria-label={t('boardTable.colorPalette')}
                                   >
                                     {postItPalette.map((paletteColor) => (
                                       <button
@@ -493,8 +505,12 @@ export function BoardTable({
                                             paletteColor.id,
                                           )
                                         }
-                                        aria-label={`Cor ${paletteColor.label}`}
-                                        title={`Cor ${paletteColor.label}`}
+                                        aria-label={t('boardTable.color', {
+                                          name: paletteColor.label,
+                                        })}
+                                        title={t('boardTable.color', {
+                                          name: paletteColor.label,
+                                        })}
                                       />
                                     ))}
                                   </div>
@@ -504,7 +520,7 @@ export function BoardTable({
                                     onClick={() =>
                                       onDeleteCard(rowIndex, columnId, card.id)
                                     }
-                                    aria-label='Remover cartão'
+                                    aria-label={t('boardTable.removeCard')}
                                   >
                                     <i
                                       className='bi bi-trash'
@@ -519,7 +535,7 @@ export function BoardTable({
 
                         {!isComposerOpen && !hasCards && (
                           <p className='kanban-empty-state mb-0'>
-                            Nenhum cartão nesta célula ainda.
+                            {t('boardTable.emptyCell')}
                           </p>
                         )}
 
@@ -527,10 +543,13 @@ export function BoardTable({
                           <div className='kanban-composer'>
                             <RichTextCell
                               id={`composer-${row.layerId}-${columnId}`}
-                              label={`Novo cartão em ${columnLabels[columnId]} para ${row.layerLabel}`}
+                              label={t('boardTable.newCardLabel', {
+                                column: columnLabels[columnId],
+                                layer: row.layerLabel,
+                              })}
                               value={composer.value}
                               onChange={onComposerValueChange}
-                              placeholder='Descreva o cartão'
+                              placeholder={t('boardTable.newCardPlaceholder')}
                               autoFocus
                             />
                             <div className='kanban-composer-actions'>
@@ -540,14 +559,14 @@ export function BoardTable({
                                 onClick={onSaveCard}
                                 disabled={!hasMeaningfulContent(composer.value)}
                               >
-                                Adicionar
+                                {t('boardTable.add')}
                               </button>
                               <button
                                 type='button'
                                 className='btn btn-sm btn-outline-secondary'
                                 onClick={onCancelComposer}
                               >
-                                Cancelar
+                                {t('boardTable.cancel')}
                               </button>
                             </div>
                           </div>
@@ -562,18 +581,23 @@ export function BoardTable({
                                 : 'btn-primary'
                             }`}
                             onClick={() => onOpenComposer(rowIndex, columnId)}
-                            aria-label={`Adicionar cartão em ${columnLabels[columnId]} para ${row.layerLabel}`}
+                            aria-label={t('boardTable.addCardInCell', {
+                              column: columnLabels[columnId],
+                              layer: row.layerLabel,
+                            })}
                           >
                             <i
                               className='bi bi-plus-circle me-1'
                               aria-hidden='true'
                             />
-                            {hasCards ? 'Adicionar cartão' : 'Novo cartão'}
+                            {hasCards
+                              ? t('boardTable.addCard')
+                              : t('boardTable.newCard')}
                           </button>
                         )}
 
                         <span className='visually-hidden' id={cellHintId}>
-                          Dica: use Enter ou Espaço para abrir um novo cartão.
+                          {t('boardTable.openCardHint')}
                         </span>
                       </div>
                     </td>
@@ -599,38 +623,38 @@ export function BoardTable({
             } me-1`}
             aria-hidden='true'
           />
-          {isStructureEditMode ? 'Sair da edição' : 'Editar estrutura'}
+          {isStructureEditMode
+            ? t('boardTable.exitEditMode')
+            : t('boardTable.editStructure')}
         </button>
         {isStructureEditMode ? (
           <small className='text-body-secondary'>
             <i className='bi bi-grid me-1' aria-hidden='true' />
-            Personalize colunas e camadas diretamente no cabeçalho da tabela.
+            {t('boardTable.structureEditHint')}
           </small>
         ) : isFixedTemplate ? (
           <small className='text-body-secondary'>
             <i className='bi bi-lock me-1' aria-hidden='true' />
-            Quadro fixo: selecione “Modelo personalizado” para editar a
-            estrutura.
+            {t('boardTable.fixedBoardHint')}
           </small>
         ) : canEnterStructureEditMode ? (
           <small className='text-body-secondary'>
             <i className='bi bi-pencil me-1' aria-hidden='true' />
-            Use “Editar estrutura” para alterar títulos, descrições e colunas.
+            {t('boardTable.editableHint')}
           </small>
         ) : (
           <small className='text-body-secondary'>
             <i className='bi bi-lock me-1' aria-hidden='true' />
-            Para editar a estrutura, deixe este projeto sem cartões.
+            {t('boardTable.noCardsHint')}
           </small>
         )}
         <small className='text-body-secondary'>
           <i className='bi bi-arrows-move me-1' aria-hidden='true' />
-          Dica: arraste e solte os cartões entre qualquer linha e coluna.
+          {t('boardTable.dragHint')}
         </small>
         <small className='text-body-secondary'>
           <i className='bi bi-keyboard me-1' aria-hidden='true' />
-          Atalho: com a célula em foco, pressione Enter ou Espaço para criar um
-          cartão.
+          {t('boardTable.keyboardHint')}
         </small>
       </div>
     </section>

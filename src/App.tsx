@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppTopbar } from './components/AppTopbar';
 import { AppFooter } from './components/AppFooter';
 import { AppDialogModal } from './components/AppDialogModal';
@@ -37,13 +38,13 @@ import {
 const BUILTIN_TEMPLATES: BoardTemplate[] = getBuiltInTemplates();
 const CUSTOM_TEMPLATE_SELECTOR_ID = 'custom';
 
-const POST_IT_PALETTE: Array<{ id: PostItColor; label: string }> = [
-  { id: 'yellow', label: 'Amarelo' },
-  { id: 'pink', label: 'Rosa' },
-  { id: 'blue', label: 'Azul' },
-  { id: 'green', label: 'Verde' },
-  { id: 'orange', label: 'Laranja' },
-  { id: 'purple', label: 'Roxo' },
+const POST_IT_COLORS: PostItColor[] = [
+  'yellow',
+  'pink',
+  'blue',
+  'green',
+  'orange',
+  'purple',
 ];
 
 interface ImportedProjectPayload {
@@ -139,6 +140,7 @@ function toEditableCustomTemplate(
 }
 
 function App() {
+  const { t, i18n } = useTranslation();
   const {
     workspace,
     activeProject,
@@ -963,12 +965,46 @@ function App() {
   };
 
   const columnOrder = activeTemplate.columns.map((column) => column.id);
-  const columnLabels = activeTemplate.columns.reduce<Record<ColumnId, string>>(
-    (accumulator, column) => {
-      accumulator[column.id] = column.label;
-      return accumulator;
-    },
-    {},
+  const columnLabels = useMemo(
+    () =>
+      activeTemplate.columns.reduce<Record<ColumnId, string>>(
+        (accumulator, column) => {
+          accumulator[column.id] = isBuiltInTemplateId(activeTemplate.id)
+            ? t(`templates.${activeTemplate.id}.columns.${column.id}`, {
+                defaultValue: column.label,
+              })
+            : column.label;
+          return accumulator;
+        },
+        {},
+      ),
+    [activeTemplate.columns, activeTemplate.id, t],
+  );
+
+  const localizedRows = useMemo(
+    () =>
+      rows.map((row) => {
+        if (!isBuiltInTemplateId(activeTemplate.id)) {
+          return row;
+        }
+
+        return {
+          ...row,
+          layerLabel: t(
+            `templates.${activeTemplate.id}.layers.${row.layerId}.label`,
+            {
+              defaultValue: row.layerLabel,
+            },
+          ),
+          layerDescription: t(
+            `templates.${activeTemplate.id}.layers.${row.layerId}.description`,
+            {
+              defaultValue: row.layerDescription,
+            },
+          ),
+        };
+      }),
+    [activeTemplate.id, rows, t],
   );
 
   const getColumnCardCount = (columnId: ColumnId): number =>
@@ -985,7 +1021,16 @@ function App() {
 
   const primaryColumn = activeTemplate.columns[0];
 
-  const lastUpdated = new Intl.DateTimeFormat('pt-BR', {
+  const postItPalette = useMemo(
+    () =>
+      POST_IT_COLORS.map((colorId) => ({
+        id: colorId,
+        label: t(`colors.${colorId}`),
+      })),
+    [t],
+  );
+
+  const lastUpdated = new Intl.DateTimeFormat(i18n.language, {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(activeProject ? new Date(activeProject.updatedAt) : new Date());
@@ -1023,7 +1068,10 @@ function App() {
         totalCards={totalCards}
         activeLayers={activeLayers}
         totalLayers={activeTemplate.layers.length}
-        primaryColumnLabel={primaryColumn?.label ?? 'Primeira coluna'}
+        primaryColumnLabel={
+          (primaryColumn ? columnLabels[primaryColumn.id] : undefined) ??
+          t('app.firstColumnFallback')
+        }
         primaryColumnCount={
           primaryColumn ? getColumnCardCount(primaryColumn.id) : 0
         }
@@ -1032,9 +1080,11 @@ function App() {
         templateOptions={[
           ...BUILTIN_TEMPLATES.map((template) => ({
             id: template.id,
-            name: template.name,
+            name: t(`templates.${template.id}.name`, {
+              defaultValue: template.name,
+            }),
           })),
-          { id: CUSTOM_TEMPLATE_SELECTOR_ID, name: 'Modelo personalizado' },
+          { id: CUSTOM_TEMPLATE_SELECTOR_ID, name: t('app.customTemplate') },
         ]}
         selectedTemplateId={
           isBuiltInTemplateId(activeTemplate.id)
@@ -1085,13 +1135,13 @@ function App() {
 
       <main className='container-fluid board-layout py-4 py-md-5 flex-grow-1'>
         <BoardTable
-          rows={rows}
+          rows={localizedRows}
           columnOrder={columnOrder}
           columnLabels={columnLabels}
           canEnterStructureEditMode={canEnterStructureEditMode}
           isFixedTemplate={isFixedTemplate}
           isStructureEditMode={isStructureEditMode}
-          postItPalette={POST_IT_PALETTE}
+          postItPalette={postItPalette}
           composer={composer}
           editingCard={editingCard}
           dragOverTarget={dragOverTarget}
@@ -1137,8 +1187,8 @@ function App() {
           type='button'
           className='back-to-top-button btn btn-primary'
           onClick={handleBackToTop}
-          aria-label='Voltar ao topo'
-          title='Voltar ao topo'
+          aria-label={t('app.backToTop')}
+          title={t('app.backToTop')}
         >
           <i className='bi bi-arrow-up' aria-hidden='true' />
         </button>
