@@ -96,7 +96,7 @@ export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
 
 export const KOLMAN_BARANAUSKAS_TEMPLATE: BoardTemplate = {
   id: KOLMAN_BARANAUSKAS_TEMPLATE_ID,
-  name: 'Quadro de Avaliação - adaptado de Kolman (1991) e Baranauskas (2014)',
+  name: 'Quadro de Avaliação - adaptado de Kolman (1991) e Baranauskas (2013)',
   columns: [
     { id: 'partes-interessadas', label: 'Partes Interessadas' },
     { id: 'problemas-e-questoes', label: 'Problemas e Questões' },
