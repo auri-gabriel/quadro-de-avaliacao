@@ -67,7 +67,7 @@ export const KOLMAN_BARANAUSKAS_TEMPLATE_ID = 'kolman-baranauskas';
 
 export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
   id: CLASSIC_BOARD_TEMPLATE_ID,
-  name: 'Quadro clássico (3x3)',
+  name: 'Quadro de Avaliação - adaptado de Melo (2007)',
   columns: [
     { id: 'stakeholders', label: 'Partes Interessadas' },
     { id: 'issues', label: 'Questões / Problemas' },
