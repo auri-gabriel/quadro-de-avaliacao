@@ -63,6 +63,7 @@ export interface EvaluationWorkspace {
 }
 
 export const CLASSIC_BOARD_TEMPLATE_ID = 'classic-3x3';
+export const KOLMAN_BARANAUSKAS_TEMPLATE_ID = 'kolman-baranauskas';
 
 export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
   id: CLASSIC_BOARD_TEMPLATE_ID,
@@ -93,6 +94,44 @@ export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
   ],
 };
 
+export const KOLMAN_BARANAUSKAS_TEMPLATE: BoardTemplate = {
+  id: KOLMAN_BARANAUSKAS_TEMPLATE_ID,
+  name: 'Quadro de Avaliação - adaptado de Kolman (1991) e Baranauskas (2014)',
+  columns: [
+    { id: 'partes-interessadas', label: 'Partes Interessadas' },
+    { id: 'problemas-e-questoes', label: 'Problemas e Questões' },
+    { id: 'ideias-e-solucoes', label: 'Ideias e Soluções' },
+  ],
+  layers: [
+    {
+      id: 'operacao',
+      label: 'Operação',
+      description: '',
+    },
+    {
+      id: 'contribuicao',
+      label: 'Contribuição',
+      description: 'atores, responsáveis',
+    },
+    {
+      id: 'fonte',
+      label: 'Fonte',
+      description: 'clientes, fornecedores',
+    },
+    {
+      id: 'mercado',
+      label: 'Mercado',
+      description: 'parceiros, concorrentes',
+    },
+    {
+      id: 'comunidade',
+      label: 'Comunidade',
+      description: 'expectadores, legisladores',
+    },
+  ],
+};
+
 export const BUILTIN_BOARD_TEMPLATES: BoardTemplate[] = [
   CLASSIC_BOARD_TEMPLATE,
+  KOLMAN_BARANAUSKAS_TEMPLATE,
 ];
