@@ -21,6 +21,11 @@ Uma aplicação moderna para construção e organização de quadros de avaliaç
 - **SCSS** + **Bootstrap 5** para estilos
 - **React Quill** para edição de texto rico
 
+## Repositório e Suporte
+
+- Repositório: https://github.com/auri-gabriel/quadro-de-avaliacao
+- Encontrou algum problema? Abra uma issue em: https://github.com/auri-gabriel/quadro-de-avaliacao/issues
+
 ## Getting Started
 
 ```bash
