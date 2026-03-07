@@ -5,8 +5,8 @@ import type {
   EvaluationRow,
   PostItColor,
 } from '../types/board';
-import type { ComposerState, EditingCardState } from '../hooks/useBoardCards';
-import type { DropIndicatorTarget } from '../hooks/useBoardDnd';
+import type { ComposerState, EditingCardState } from '../model/useBoardCards';
+import type { DropIndicatorTarget } from '../model/useBoardDnd';
 
 interface DragOverTarget {
   rowIndex: number;
