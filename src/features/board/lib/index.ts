@@ -10,4 +10,4 @@ export {
   loadWorkspace,
   parseBoardRows,
   saveWorkspace,
-} from '../../../lib/boardStorage';
+} from './boardStorage';

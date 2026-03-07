@@ -1,3 +1,3 @@
-export { BoardHeader } from '../../../components/BoardHeader';
-export { BoardTable } from '../../../components/BoardTable';
-export { RichTextCell } from '../../../components/RichTextCell';
+export { BoardHeader } from './BoardHeader';
+export { BoardTable } from './BoardTable';
+export { RichTextCell } from './RichTextCell';
