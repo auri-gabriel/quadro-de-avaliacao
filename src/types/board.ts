@@ -65,6 +65,7 @@ export interface EvaluationWorkspace {
 export const CLASSIC_BOARD_TEMPLATE_ID = 'classic-3x3';
 export const KOLMAN_BARANAUSKAS_TEMPLATE_ID = 'kolman-baranauskas';
 export const IPE_MELO_TEMPLATE_ID = 'ipe-melo-2007';
+export const LIU_SEMIOTIC_LADDER_TEMPLATE_ID = 'liu-semiotic-ladder-2000';
 
 export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
   id: CLASSIC_BOARD_TEMPLATE_ID,
@@ -158,8 +159,52 @@ export const IPE_MELO_TEMPLATE: BoardTemplate = {
   ],
 };
 
+export const LIU_SEMIOTIC_LADDER_TEMPLATE: BoardTemplate = {
+  id: LIU_SEMIOTIC_LADDER_TEMPLATE_ID,
+  name: 'Escada Semiótica - adaptada de Liu (2000)',
+  columns: [{ id: 'aspectos-a-considerar', label: 'Aspectos a considerar' }],
+  layers: [
+    {
+      id: 'mundo-social',
+      label: 'Mundo Social',
+      description:
+        'Crenças, expectativas, funções, compromissos, contratos, leis, cultura, entre outros.',
+    },
+    {
+      id: 'pragmatico',
+      label: 'Pragmático',
+      description: 'Intenções, comunicações, conversações, negociações, entre outros.',
+    },
+    {
+      id: 'semantico',
+      label: 'Semântico',
+      description:
+        'Significados, proposições, validade, verdade, significação, denotações, entre outros.',
+    },
+    {
+      id: 'sintatico',
+      label: 'Sintático',
+      description:
+        'Estrutura formal, linguagem, lógica, dados, dedução de registros, software, arquivos, entre outros.',
+    },
+    {
+      id: 'empirico',
+      label: 'Empírico',
+      description:
+        'Padrões, variedade, ruído, entropia, capacidade do canal, redundância, eficiência, códigos.',
+    },
+    {
+      id: 'mundo-fisico',
+      label: 'Mundo Físico',
+      description:
+        'Sinais, traços, distinções físicas, hardware, densidade de componentes, velocidade, economia, entre outros.',
+    },
+  ],
+};
+
 export const BUILTIN_BOARD_TEMPLATES: BoardTemplate[] = [
   CLASSIC_BOARD_TEMPLATE,
   KOLMAN_BARANAUSKAS_TEMPLATE,
   IPE_MELO_TEMPLATE,
+  LIU_SEMIOTIC_LADDER_TEMPLATE,
 ];
