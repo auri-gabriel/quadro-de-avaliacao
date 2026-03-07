@@ -64,6 +64,7 @@ export interface EvaluationWorkspace {
 
 export const CLASSIC_BOARD_TEMPLATE_ID = 'classic-3x3';
 export const KOLMAN_BARANAUSKAS_TEMPLATE_ID = 'kolman-baranauskas';
+export const IPE_MELO_TEMPLATE_ID = 'ipe-melo-2007';
 
 export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
   id: CLASSIC_BOARD_TEMPLATE_ID,
@@ -131,7 +132,34 @@ export const KOLMAN_BARANAUSKAS_TEMPLATE: BoardTemplate = {
   ],
 };
 
+export const IPE_MELO_TEMPLATE: BoardTemplate = {
+  id: IPE_MELO_TEMPLATE_ID,
+  name: 'Quadro de Avaliação IPE - adaptado de Melo (2007)',
+  columns: [
+    { id: 'problemas-e-questoes', label: 'Problemas e Questões' },
+    { id: 'ideias-e-solucoes', label: 'Ideias e Soluções' },
+  ],
+  layers: [
+    {
+      id: 'acessibilidade',
+      label: 'Acessibilidade',
+      description: 'Percepção, operação e compreensão',
+    },
+    {
+      id: 'usabilidade',
+      label: 'Usabilidade',
+      description: 'Eficácia, eficiência e satisfação no uso',
+    },
+    {
+      id: 'funcionalidade',
+      label: 'Funcionalidade',
+      description: 'Suporte às atividades realizadas',
+    },
+  ],
+};
+
 export const BUILTIN_BOARD_TEMPLATES: BoardTemplate[] = [
   CLASSIC_BOARD_TEMPLATE,
   KOLMAN_BARANAUSKAS_TEMPLATE,
+  IPE_MELO_TEMPLATE,
 ];
