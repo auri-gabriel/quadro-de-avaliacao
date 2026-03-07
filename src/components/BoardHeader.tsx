@@ -224,19 +224,25 @@ export function BoardHeader({
                 Modelo do quadro
               </label>
               <div className='project-manager-actions'>
-                <select
-                  id='template-select'
-                  className='form-select form-select-sm'
-                  value={selectedTemplateId}
-                  onChange={(event) => onChangeTemplate(event.target.value)}
-                  disabled={!activeProject || !canChangeTemplate}
-                >
-                  {templateOptions.map((template) => (
-                    <option key={template.id} value={template.id}>
-                      {template.name}
-                    </option>
-                  ))}
-                </select>
+                <div className='template-select-wrapper'>
+                  <select
+                    id='template-select'
+                    className='form-select form-select-sm'
+                    value={selectedTemplateId}
+                    onChange={(event) => onChangeTemplate(event.target.value)}
+                    disabled={!activeProject || !canChangeTemplate}
+                  >
+                    {templateOptions.map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.name}
+                      </option>
+                    ))}
+                  </select>
+                  <i
+                    className='bi bi-chevron-down template-select-chevron'
+                    aria-hidden='true'
+                  />
+                </div>
               </div>
             </div>
 

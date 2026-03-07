@@ -277,6 +277,25 @@
     background: color-mix(in srgb, white 92%, var(--bs-body-bg) 8%);
   }
 
+  .template-select-wrapper {
+    position: relative;
+    width: 100%;
+
+    .form-select {
+      padding-right: 2rem;
+    }
+  }
+
+  .template-select-chevron {
+    position: absolute;
+    top: 50%;
+    right: 0.7rem;
+    transform: translateY(-50%);
+    font-size: 0.72rem;
+    color: var(--bs-secondary-color);
+    pointer-events: none;
+  }
+
   .form-label {
     margin-bottom: 0.2rem !important;
     font-size: 0.8rem;

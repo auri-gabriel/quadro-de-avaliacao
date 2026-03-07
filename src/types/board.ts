@@ -63,10 +63,13 @@ export interface EvaluationWorkspace {
 }
 
 export const CLASSIC_BOARD_TEMPLATE_ID = 'classic-3x3';
+export const KOLMAN_BARANAUSKAS_TEMPLATE_ID = 'kolman-baranauskas';
+export const IPE_MELO_TEMPLATE_ID = 'ipe-melo-2007';
+export const LIU_SEMIOTIC_LADDER_TEMPLATE_ID = 'liu-semiotic-ladder-2000';
 
 export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
   id: CLASSIC_BOARD_TEMPLATE_ID,
-  name: 'Quadro clássico (3x3)',
+  name: 'Quadro de Avaliação - adaptado de Melo (2007)',
   columns: [
     { id: 'stakeholders', label: 'Partes Interessadas' },
     { id: 'issues', label: 'Questões / Problemas' },
@@ -93,6 +96,115 @@ export const CLASSIC_BOARD_TEMPLATE: BoardTemplate = {
   ],
 };
 
+export const KOLMAN_BARANAUSKAS_TEMPLATE: BoardTemplate = {
+  id: KOLMAN_BARANAUSKAS_TEMPLATE_ID,
+  name: 'Quadro de Avaliação - adaptado de Kolman (1991) e Baranauskas (2013)',
+  columns: [
+    { id: 'partes-interessadas', label: 'Partes Interessadas' },
+    { id: 'problemas-e-questoes', label: 'Problemas e Questões' },
+    { id: 'ideias-e-solucoes', label: 'Ideias e Soluções' },
+  ],
+  layers: [
+    {
+      id: 'operacao',
+      label: 'Operação',
+      description: '',
+    },
+    {
+      id: 'contribuicao',
+      label: 'Contribuição',
+      description: 'atores, responsáveis',
+    },
+    {
+      id: 'fonte',
+      label: 'Fonte',
+      description: 'clientes, fornecedores',
+    },
+    {
+      id: 'mercado',
+      label: 'Mercado',
+      description: 'parceiros, concorrentes',
+    },
+    {
+      id: 'comunidade',
+      label: 'Comunidade',
+      description: 'expectadores, legisladores',
+    },
+  ],
+};
+
+export const IPE_MELO_TEMPLATE: BoardTemplate = {
+  id: IPE_MELO_TEMPLATE_ID,
+  name: 'Quadro de Avaliação IPE - adaptado de Melo (2007)',
+  columns: [
+    { id: 'problemas-e-questoes', label: 'Problemas e Questões' },
+    { id: 'ideias-e-solucoes', label: 'Ideias e Soluções' },
+  ],
+  layers: [
+    {
+      id: 'acessibilidade',
+      label: 'Acessibilidade',
+      description: 'Percepção, operação e compreensão',
+    },
+    {
+      id: 'usabilidade',
+      label: 'Usabilidade',
+      description: 'Eficácia, eficiência e satisfação no uso',
+    },
+    {
+      id: 'funcionalidade',
+      label: 'Funcionalidade',
+      description: 'Suporte às atividades realizadas',
+    },
+  ],
+};
+
+export const LIU_SEMIOTIC_LADDER_TEMPLATE: BoardTemplate = {
+  id: LIU_SEMIOTIC_LADDER_TEMPLATE_ID,
+  name: 'Escada Semiótica - adaptada de Liu (2000)',
+  columns: [{ id: 'aspectos-a-considerar', label: 'Aspectos a considerar' }],
+  layers: [
+    {
+      id: 'mundo-social',
+      label: 'Mundo Social',
+      description:
+        'Crenças, expectativas, funções, compromissos, contratos, leis, cultura, entre outros.',
+    },
+    {
+      id: 'pragmatico',
+      label: 'Pragmático',
+      description: 'Intenções, comunicações, conversações, negociações, entre outros.',
+    },
+    {
+      id: 'semantico',
+      label: 'Semântico',
+      description:
+        'Significados, proposições, validade, verdade, significação, denotações, entre outros.',
+    },
+    {
+      id: 'sintatico',
+      label: 'Sintático',
+      description:
+        'Estrutura formal, linguagem, lógica, dados, dedução de registros, software, arquivos, entre outros.',
+    },
+    {
+      id: 'empirico',
+      label: 'Empírico',
+      description:
+        'Padrões, variedade, ruído, entropia, capacidade do canal, redundância, eficiência, códigos.',
+    },
+    {
+      id: 'mundo-fisico',
+      label: 'Mundo Físico',
+      description:
+        'Sinais, traços, distinções físicas, hardware, densidade de componentes, velocidade, economia, entre outros.',
+    },
+  ],
+};
+
 export const BUILTIN_BOARD_TEMPLATES: BoardTemplate[] = [
   CLASSIC_BOARD_TEMPLATE,
+  KOLMAN_BARANAUSKAS_TEMPLATE,
+  IPE_MELO_TEMPLATE,
+  LIU_SEMIOTIC_LADDER_TEMPLATE,
 ];

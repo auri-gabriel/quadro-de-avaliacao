@@ -384,6 +384,27 @@ function App() {
         return;
       }
 
+      const switchChoice = await openDialog(
+        'Trocar modelo do quadro',
+        'Tem certeza que deseja trocar para o modelo personalizado? A estrutura atual do quadro será substituída e esta ação não pode ser desfeita.',
+        [
+          {
+            value: 'confirm',
+            label: 'Trocar modelo',
+            buttonClassName: 'btn-danger',
+          },
+          {
+            value: 'cancel',
+            label: 'Cancelar',
+            buttonClassName: 'btn-outline-secondary',
+          },
+        ],
+      );
+
+      if (switchChoice !== 'confirm') {
+        return;
+      }
+
       updateActiveProjectWithHistory((currentProject) => ({
         ...currentProject,
         templateId: customTemplate.id,
@@ -397,6 +418,27 @@ function App() {
 
     const nextTemplate = getBuiltInTemplateById(templateId);
     if (!nextTemplate || nextTemplate.id === activeTemplate.id) {
+      return;
+    }
+
+    const switchChoice = await openDialog(
+      'Trocar modelo do quadro',
+      `Tem certeza que deseja trocar para o modelo "${nextTemplate.name}"? A estrutura atual do quadro será substituída e esta ação não pode ser desfeita.`,
+      [
+        {
+          value: 'confirm',
+          label: 'Trocar modelo',
+          buttonClassName: 'btn-danger',
+        },
+        {
+          value: 'cancel',
+          label: 'Cancelar',
+          buttonClassName: 'btn-outline-secondary',
+        },
+      ],
+    );
+
+    if (switchChoice !== 'confirm') {
       return;
     }
 
