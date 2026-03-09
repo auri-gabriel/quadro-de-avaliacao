@@ -359,6 +359,8 @@ function BoardPage() {
       return;
     }
 
+    const isCurrentTemplateCustom = !isBuiltInTemplateId(activeTemplate.id);
+
     if (!canChangeTemplate) {
       await showInfoDialog(
         'Troca de modelo bloqueada',
@@ -381,9 +383,26 @@ function BoardPage() {
         return;
       }
 
+      updateActiveProjectWithHistory((currentProject) => ({
+        ...currentProject,
+        templateId: customTemplate.id,
+        template: customTemplate,
+        rows: createInitialBoard(customTemplate),
+      }));
+      clearCardUiState();
+      clearDragState();
+      return;
+    }
+
+    const nextTemplate = getBuiltInTemplateById(templateId);
+    if (!nextTemplate || nextTemplate.id === activeTemplate.id) {
+      return;
+    }
+
+    if (isCurrentTemplateCustom) {
       const switchChoice = await openDialog(
         'Trocar modelo do quadro',
-        'Tem certeza que deseja trocar para o modelo personalizado? A estrutura atual do quadro será substituída e esta ação não pode ser desfeita.',
+        `Tem certeza que deseja trocar para o modelo "${nextTemplate.name}"? As personalizações de colunas e camadas do modelo atual serão perdidas e esta ação não pode ser desfeita.`,
         [
           {
             value: 'confirm',
@@ -401,42 +420,6 @@ function BoardPage() {
       if (switchChoice !== 'confirm') {
         return;
       }
-
-      updateActiveProjectWithHistory((currentProject) => ({
-        ...currentProject,
-        templateId: customTemplate.id,
-        template: customTemplate,
-        rows: createInitialBoard(customTemplate),
-      }));
-      clearCardUiState();
-      clearDragState();
-      return;
-    }
-
-    const nextTemplate = getBuiltInTemplateById(templateId);
-    if (!nextTemplate || nextTemplate.id === activeTemplate.id) {
-      return;
-    }
-
-    const switchChoice = await openDialog(
-      'Trocar modelo do quadro',
-      `Tem certeza que deseja trocar para o modelo "${nextTemplate.name}"? A estrutura atual do quadro será substituída e esta ação não pode ser desfeita.`,
-      [
-        {
-          value: 'confirm',
-          label: 'Trocar modelo',
-          buttonClassName: 'btn-danger',
-        },
-        {
-          value: 'cancel',
-          label: 'Cancelar',
-          buttonClassName: 'btn-outline-secondary',
-        },
-      ],
-    );
-
-    if (switchChoice !== 'confirm') {
-      return;
     }
 
     updateActiveProjectWithHistory((currentProject) => ({
